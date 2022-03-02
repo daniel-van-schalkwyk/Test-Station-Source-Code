@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"cmath": "cpp",
+			"unordered_map": "cpp",
+			"initializer_list": "cpp"
+		}
+	}
+}
