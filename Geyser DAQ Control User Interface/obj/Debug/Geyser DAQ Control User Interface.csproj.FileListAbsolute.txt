@@ -1,0 +1,10 @@
+C:\Users\pdvs1\Documents\geyser_boiler_daq_control\Geyser_Data_Acquisition_Controller\Geyser DAQ Control User Interface\bin\Debug\Geyser DAQ Control User Interface.exe.config
+C:\Users\pdvs1\Documents\geyser_boiler_daq_control\Geyser_Data_Acquisition_Controller\Geyser DAQ Control User Interface\bin\Debug\Geyser DAQ Control User Interface.exe
+C:\Users\pdvs1\Documents\geyser_boiler_daq_control\Geyser_Data_Acquisition_Controller\Geyser DAQ Control User Interface\bin\Debug\Geyser DAQ Control User Interface.pdb
+C:\Users\pdvs1\Documents\geyser_boiler_daq_control\Geyser_Data_Acquisition_Controller\Geyser DAQ Control User Interface\obj\Debug\Geyser_DAQ_Control_User_Interface.Form1.resources
+C:\Users\pdvs1\Documents\geyser_boiler_daq_control\Geyser_Data_Acquisition_Controller\Geyser DAQ Control User Interface\obj\Debug\Geyser_DAQ_Control_User_Interface.Properties.Resources.resources
+C:\Users\pdvs1\Documents\geyser_boiler_daq_control\Geyser_Data_Acquisition_Controller\Geyser DAQ Control User Interface\obj\Debug\Geyser DAQ Control User Interface.csproj.GenerateResource.cache
+C:\Users\pdvs1\Documents\geyser_boiler_daq_control\Geyser_Data_Acquisition_Controller\Geyser DAQ Control User Interface\obj\Debug\Geyser DAQ Control User Interface.csproj.CoreCompileInputs.cache
+C:\Users\pdvs1\Documents\geyser_boiler_daq_control\Geyser_Data_Acquisition_Controller\Geyser DAQ Control User Interface\obj\Debug\Geyser DAQ Control User Interface.exe
+C:\Users\pdvs1\Documents\geyser_boiler_daq_control\Geyser_Data_Acquisition_Controller\Geyser DAQ Control User Interface\obj\Debug\Geyser DAQ Control User Interface.pdb
+C:\Users\pdvs1\Documents\geyser_boiler_daq_control\Geyser_Data_Acquisition_Controller\Geyser DAQ Control User Interface\obj\Debug\Geyser DAQ Control User Interface.csproj.AssemblyReference.cache
