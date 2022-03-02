@@ -33,26 +33,41 @@ namespace TestStationAPI
                 {(int)GetCommandsIndex.inletTankThermostatTemp, "get:" + ((int)GetCommandsIndex.inletTankThermostatTemp).ToString()},
                 {(int)GetCommandsIndex.inletValvePosition, "get:" + ((int)GetCommandsIndex.inletValvePosition).ToString()}
             };
-        SerialPort serialPort = new SerialPort();
+        private SerialPort SerialPort_ = new SerialPort();
         private string[] BaudRates_ = { "9600", "115200", "256000" };
 
         // Constructor
         public TestStationCommandInterface()
         {
-
+            SerialPortSetup();  // Configure Serial Port for controller communication
         }
 
         // General commands
         private void SendCommandPackage(String commandString)
         {
             // Use serial port to send requested command to controller
+            SerialPort_.WriteLine(commandString);
         }
 
-        // Get functions for sensor measurements
-
-        static void GetExperimentalParameters(int sampleTime, double geyserSetTemp, double chamberSetTemp, double inletSetTemp, double waterFlowRate)
+        private void SerialPortSetup()
         {
-            var self = new TestStationCommandInterface();
+            SerialPort_.BaudRate = int.Parse(BaudRates_[1]);
+            string[] portNames = SerialPort.GetPortNames();
+            SerialPort_.PortName = portNames[portNames.Length - 1];
+            SerialPort_.Handshake = Handshake.None;
+            SerialPort_.Parity = Parity.None;
+            SerialPort_.Open();
+        }
+
+        public void CloseSerialPort()
+        {
+            SerialPort_.Close();
+        }
+
+        // *** Get functions for sensor measurements ***
+
+        public void SetExperimentalParameters(int sampleTime, double geyserSetTemp, double chamberSetTemp, double inletSetTemp, double waterFlowRate)
+        {
             var experimentalCommand = new StringBuilder("");
             experimentalCommand.Append(self.SetupCMD).Append(',')
                                .Append(sampleTime).Append(',')
@@ -61,16 +76,15 @@ namespace TestStationAPI
                                .Append(inletSetTemp).Append(',')
                                .Append(waterFlowRate);
             // Send configuration string to controller via serial port
-            self.SendCommandPackage(experimentalCommand.ToString());
+            this.SendCommandPackage(experimentalCommand.ToString());
         }
 
         // User / Eskom / Atmospheric commands
-        static public double GetFlowRate()
+        public double GetFlowRate()
         {
             String flowRate = "";
-            var self = new TestStationCommandInterface();
             // Get the flow rate from the controller 
-            self.SendCommandPackage(self.GetCommands[(int)GetCommandsIndex.flowRate]);
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.flowRate]);
             return Double.Parse(flowRate);
         }
 
@@ -82,7 +96,7 @@ namespace TestStationAPI
             return busTempString;
         }
 
-        static public double GetGeyserThermostatTemperature()
+        public double GetGeyserThermostatTemperature()
         {
             string thermostatTemperature = "";
             // Get the thermostat temperature from the controller 
@@ -90,73 +104,73 @@ namespace TestStationAPI
             return Double.Parse(thermostatTemperature);
         }
 
-        static public double GetElementPowerState()
+        public double GetElementPowerState()
         {
 
             return 0;
         }
 
-        static public double GetElementPowerUsage()
+        public double GetElementPowerUsage()
         {
 
             return 0;
         }
 
-        static public double GetLabTemperature()
+        public double GetLabTemperature()
         {
 
             return 0;
         }
 
-        static public double GetOutletTemperature()
+        public double GetOutletTemperature()
         {
 
             return 0;
         }
 
-        static public double GetInletTemperature()
+        public double GetInletTemperature()
         {
 
             return 0;
         }
 
-        static public double GetGeyserSurfaceTemperatures()
+        public double GetGeyserSurfaceTemperatures()
         {
 
             return 0;
         }
 
-        static public double GetChamberTemperature()
+        public double GetChamberTemperature()
         {
 
             return 0;
         }
 
-        static public double GetChamberFanStatus()
+        public double GetChamberFanStatus()
         {
 
             return 0;
         }
 
-        static public double GetWaterSourceTemperature()
+        public double GetWaterSourceTemperature()
         {
 
             return 0;
         }
 
-        static public double GetInletFreezerTemperature()
+        public double GetInletFreezerTemperature()
         {
 
             return 0;
         }
 
-        static public double GetInletTankThermostatTemperature()
+        public double GetInletTankThermostatTemperature()
         {
 
             return 0;
         }
 
-        static public double GetInletValveAngle()
+        public double GetInletValveAngle()
         {
 
             return 0;
@@ -164,22 +178,22 @@ namespace TestStationAPI
 
         // Set functions for Actuators
 
-        static public void SetOutletValveStep(int stepSize, bool direction)
+        public void SetOutletValveStep(int stepSize, bool direction)
         {
 
         }
 
-        static public void SetElementElectricitySupply(bool state)
+        public void SetElementElectricitySupply(bool state)
         {
 
         }
 
-        static public void SetInletValveAngle(double angle)
+        public void SetInletValveAngle(double angle)
         {
 
         }
 
-        static public void SetInletFreezerTemperature(double freezerTemp)
+        public void SetInletFreezerTemperature(double freezerTemp)
         {
 
         }
