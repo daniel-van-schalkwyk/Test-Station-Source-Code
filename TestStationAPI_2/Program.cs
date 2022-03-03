@@ -11,6 +11,7 @@ namespace TestStationAPI
     {
         // Properties 
         public String SetupCMD = "2:1";
+        private double PowerUsage_;
         public enum GetCommandsIndex : int
         {
             flowRate, powerUsage, labTemp, outletTemp, geyserThermistorTemp,
@@ -24,6 +25,7 @@ namespace TestStationAPI
                 {(int)GetCommandsIndex.labTemp, "get:" + ((int)GetCommandsIndex.labTemp).ToString()},
                 {(int)GetCommandsIndex.outletTemp, "get:" + ((int)GetCommandsIndex.outletTemp).ToString()},
                 {(int)GetCommandsIndex.geyserThermistorTemp, "get:" + ((int)GetCommandsIndex.geyserThermistorTemp).ToString()},
+                {(int)GetCommandsIndex.busTempVector, "get:" + ((int)GetCommandsIndex.busTempVector).ToString()},
                 {(int)GetCommandsIndex.geyserSurfaceTemp, "get:" + ((int)GetCommandsIndex.geyserSurfaceTemp).ToString()},
                 {(int)GetCommandsIndex.chamberTemp, "get:" + ((int)GetCommandsIndex.chamberTemp).ToString()},
                 {(int)GetCommandsIndex.chamberFans, "get:" + ((int)GetCommandsIndex.chamberFans).ToString()},
@@ -69,7 +71,7 @@ namespace TestStationAPI
         public void SetExperimentalParameters(int sampleTime, double geyserSetTemp, double chamberSetTemp, double inletSetTemp, double waterFlowRate)
         {
             var experimentalCommand = new StringBuilder("");
-            experimentalCommand.Append(self.SetupCMD).Append(',')
+            experimentalCommand.Append(this.SetupCMD).Append(',')
                                .Append(sampleTime).Append(',')
                                .Append(chamberSetTemp).Append(',')
                                .Append(geyserSetTemp).Append(',')
@@ -91,7 +93,8 @@ namespace TestStationAPI
         public String RequestTemperatureBus(int busNumber)
         {
             String busTempString = "";
-
+            // Get the flow rate from the controller 
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.busTempVector]);
 
             return busTempString;
         }
@@ -100,78 +103,87 @@ namespace TestStationAPI
         {
             string thermostatTemperature = "";
             // Get the thermostat temperature from the controller 
-
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.geyserThermistorTemp]);
             return Double.Parse(thermostatTemperature);
         }
 
-        public double GetElementPowerState()
+        public bool GetElementPowerState()
         {
-
-            return 0;
+            if (this.PowerUsage_ > 0) { return true; }
+            return false;
         }
 
         public double GetElementPowerUsage()
         {
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.powerUsage]);
 
             return 0;
         }
 
         public double GetLabTemperature()
         {
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.labTemp]);
 
             return 0;
         }
 
         public double GetOutletTemperature()
         {
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.outletTemp]);
 
             return 0;
         }
 
         public double GetInletTemperature()
         {
-
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.inletWaterTemp]);
             return 0;
         }
 
         public double GetGeyserSurfaceTemperatures()
         {
-
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.geyserSurfaceTemp]);
             return 0;
         }
 
         public double GetChamberTemperature()
         {
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.chamberTemp]);
 
             return 0;
         }
 
         public double GetChamberFanStatus()
         {
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.chamberFans]);
 
             return 0;
         }
 
         public double GetWaterSourceTemperature()
         {
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.sourceWaterTemp]);
 
             return 0;
         }
 
         public double GetInletFreezerTemperature()
         {
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.freezerTemp]);
 
             return 0;
         }
 
         public double GetInletTankThermostatTemperature()
         {
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.inletTankThermostatTemp]);
 
             return 0;
         }
 
         public double GetInletValveAngle()
         {
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.inletValvePosition]);
 
             return 0;
         }
