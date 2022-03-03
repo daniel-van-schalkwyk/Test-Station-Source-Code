@@ -18,6 +18,10 @@ namespace TestStationAPI
             busTempVector, geyserSurfaceTemp, chamberTemp, chamberFans, sourceWaterTemp,
             inletWaterTemp, freezerTemp, inletTankThermostatTemp, inletValvePosition
         };
+        public enum SetCommandsIndex : int
+        {
+            outletValveSet, powerAvailSet, setInletValve, setInletFreezerTemp, setExpParams, setInletGeyserTemp
+        };
         public Dictionary<int, String> GetCommands = new Dictionary<int, String>()
             {
                 {(int)GetCommandsIndex.flowRate, "get:" + ((int)GetCommandsIndex.flowRate).ToString()},
@@ -34,6 +38,16 @@ namespace TestStationAPI
                 {(int)GetCommandsIndex.freezerTemp, "get:" + ((int)GetCommandsIndex.freezerTemp).ToString()},
                 {(int)GetCommandsIndex.inletTankThermostatTemp, "get:" + ((int)GetCommandsIndex.inletTankThermostatTemp).ToString()},
                 {(int)GetCommandsIndex.inletValvePosition, "get:" + ((int)GetCommandsIndex.inletValvePosition).ToString()}
+            };
+
+        public Dictionary<int, String> SetCommands = new Dictionary<int, String>()
+            {
+                {(int)SetCommandsIndex.outletValveSet, "set:" + ((int)SetCommandsIndex.outletValveSet).ToString()},
+                {(int)SetCommandsIndex.powerAvailSet, "set:" + ((int)SetCommandsIndex.powerAvailSet).ToString()},
+                {(int)SetCommandsIndex.setInletValve, "set:" + ((int)SetCommandsIndex.setInletValve).ToString()},
+                {(int)SetCommandsIndex.setInletFreezerTemp, "set:" + ((int)SetCommandsIndex.setInletFreezerTemp).ToString()},
+                {(int)SetCommandsIndex.setExpParams, "set:" + ((int)SetCommandsIndex.setExpParams).ToString()},
+                {(int)SetCommandsIndex.setInletGeyserTemp, "set:" + ((int)SetCommandsIndex.setInletGeyserTemp).ToString()}
             };
         private SerialPort SerialPort_ = new SerialPort();
         private string[] BaudRates_ = { "9600", "115200", "256000" };
@@ -68,19 +82,6 @@ namespace TestStationAPI
 
         // *** Get functions for sensor measurements ***
 
-        public void SetExperimentalParameters(int sampleTime, double geyserSetTemp, double chamberSetTemp, double inletSetTemp, double waterFlowRate)
-        {
-            var experimentalCommand = new StringBuilder("");
-            experimentalCommand.Append(this.SetupCMD).Append(',')
-                               .Append(sampleTime).Append(',')
-                               .Append(chamberSetTemp).Append(',')
-                               .Append(geyserSetTemp).Append(',')
-                               .Append(inletSetTemp).Append(',')
-                               .Append(waterFlowRate);
-            // Send configuration string to controller via serial port
-            this.SendCommandPackage(experimentalCommand.ToString());
-        }
-
         // User / Eskom / Atmospheric commands
         public double GetFlowRate()
         {
@@ -94,7 +95,7 @@ namespace TestStationAPI
         {
             String busTempString = "";
             // Get the flow rate from the controller 
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.busTempVector]);
+            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.busTempVector] + ":" + busNumber.ToString());
 
             return busTempString;
         }
@@ -192,22 +193,43 @@ namespace TestStationAPI
 
         public void SetOutletValveStep(int stepSize, bool direction)
         {
-
+            this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.outletValveSet] + "," + direction.ToString() + "," + stepSize.ToString());
         }
 
         public void SetElementElectricitySupply(bool state)
         {
-
+            this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.powerAvailSet] + "," + state.ToString());
         }
 
         public void SetInletValveAngle(double angle)
         {
-
+            if (angle > 90 || angle < 0)
+                Console.WriteLine("Inlet servo valve angle must be in the range of 0 to 90 degrees");
+            else 
+                this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.powerAvailSet] + "," + angle.ToString());
         }
 
         public void SetInletFreezerTemperature(double freezerTemp)
         {
+            this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.setInletFreezerTemp] + "," + freezerTemp.ToString());
+        }
 
+        public void SetInletGeyserTemperature(double inletGeyserTemp)
+        {
+            this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.setInletGeyserTemp] + "," + inletGeyserTemp.ToString());
+        }
+
+        public void SetExperimentalParameters(int sampleTime, double geyserSetTemp, double chamberSetTemp, double inletSetTemp, double waterFlowRate)
+        {
+            var experimentalCommand = new StringBuilder("");
+            experimentalCommand.Append(this.SetupCMD).Append(',')
+                               .Append(sampleTime).Append(',')
+                               .Append(chamberSetTemp).Append(',')
+                               .Append(geyserSetTemp).Append(',')
+                               .Append(inletSetTemp).Append(',')
+                               .Append(waterFlowRate);
+            // Send configuration string to controller via serial port
+            this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.setExpParams] + "," + experimentalCommand.ToString());
         }
     }
 }
