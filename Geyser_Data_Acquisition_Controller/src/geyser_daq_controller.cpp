@@ -66,7 +66,17 @@ void loop()
     // Serial.println("<- Incoming message from inlet controller: ->");
     String portMessage = inletWaterComms.readStringUntil(0x10);
     // Serial.println(portMessage);
-    if(portMessage.startsWith("R") || portMessage.startsWith("r"))  { sendInletControlParams(); }
+    if(portMessage.startsWith("R") || portMessage.startsWith("r"))  
+    { 
+      sendInletControlParams(); 
+    }
+    else if(inletGetRequestFlag && (portMessage.startsWith("sr") || portMessage.startsWith("gr") \
+            || getSubString(portMessage, ':', 0).equalsIgnoreCase("gr") || getSubString(portMessage, ':', 0).equalsIgnoreCase("sr")))
+    {
+      // Do something with the getResponse from the inlet controller
+      Serial.println(portMessage); 
+      inletGetRequestFlag = false;
+    }
   }
   else if(systemStateFlags[runState])  // Continue with regular program sequence
   {
@@ -511,6 +521,10 @@ void readIncomingSerialMessage(int serialPort)
     }
     else {Serial.println("System not in \"Run\" State: Valve won't actuate...");}
   }
+  else if(getSubString(portMessage, ':', 0).equalsIgnoreCase("get") || getSubString(portMessage, ':', 0).equalsIgnoreCase("set"))
+  {
+    readGetSetCommand(portMessage); 
+  }
   else if(getSubString(portMessage, ':', 0).equalsIgnoreCase("SVP")) // if Outlet Servo Valve Position is received
   {
     inletWaterComms.println("SVP:" + String(getSubString(portMessage, ':', 1).toInt()));
@@ -597,7 +611,7 @@ void readIncomingSerialMessage(int serialPort)
         break;
       }
       default:
-        Serial.println("Error occured: Command from UI not recognised...");
+        Serial.println("Error occured: Command from UI/Computer not recognised...");
         break;
     }
   }
@@ -620,52 +634,183 @@ void setTemperatureRegulationFlags()
 }
 
 /*! Function description
+  @brief  This function is used to respond to API commands from a computer. Thes commands are get and set commands. 
+          The get commands are for sensor measurements.
+          The set commands are used to configure parameters and control system actuators;
+  \param  getSetCommand The command string sent from the computer and interface program
+*/
+void readGetSetCommand(String getSetCommand)
+{
+  String getResponse = "gr:";
+  String setResponse = "sr:";
+  if(getSubString(getSetCommand, ':', 0).equalsIgnoreCase("get"))
+  {
+    int getCommand = -1;
+    if(getSubString(getSetCommand, ':', 1).length() > 0) getCommand = getSubString(getSetCommand, ':', 1).toInt();
+    switch(getCommand)
+    {
+      case (int)GetCommandsIndex::flowRateIdx:
+      {
+        getResponse += String(AccumulatedWaterConsumedPerDataSample, 3);
+      }
+      case (int)GetCommandsIndex::powerUsageIdx:
+      {
+        getResponse += String(AccumulatedEnergyPerDataSample, 3);
+      }
+      case (int)GetCommandsIndex::labTempIdx:
+      {
+        getResponse += String(climaticChamberTempArray[climaticChamberTempNames::outsideTempAddress], 3);
+      }
+      case (int)GetCommandsIndex::outletTempIdx:
+      {
+        getResponse += String(climaticChamberTempArray[climaticChamberTempNames::outletWaterAddress], 3);
+      }
+      case GetCommandsIndex::getDeadband:
+      {
+        getResponse += deadBandMargin;
+      }
+      case (int)GetCommandsIndex::geyserThermistorTempIdx:
+      {
+        getResponse += String(climaticChamberTempArray[climaticChamberTempNames::geyserWaterTempAddress], 3);
+      }
+      case (int)GetCommandsIndex::busTempVectorIdx: // In this case "Get:5:busNumber"
+      {
+        int busNumber = getSubString(getSetCommand, ':', 2).toInt(); // This is the requested bus number 
+        getResponse += "Bus " + String(busNumber) + ",";
+        getResponse += tempProfileStringArray[busNumber];
+      }
+      case (int)GetCommandsIndex::geyserSurfaceTempIdx:
+      {
+        getResponse += "T";
+        getResponse += String(climaticChamberTempArray[climaticChamberTempNames::topSurfaceGeyserTempAddress], 3);
+        getResponse += ",B";
+        getResponse += String(climaticChamberTempArray[climaticChamberTempNames::bottomSurfaceGeyserTempAddress], 3);
+      }
+      case (int)GetCommandsIndex::chamberTempIdx:
+      {
+        double AvgChamberTemp = (climaticChamberTempArray[climaticChamberTempNames::amb1TempAddress] + \
+                        climaticChamberTempArray[climaticChamberTempNames::amb2TempAddress])/2;
+        getResponse += String(AvgChamberTemp, 3);
+      }
+      case (int)GetCommandsIndex::chamberFansIdx:
+      {
+        // To-Do:
+      }
+      case (int)GetCommandsIndex::currentMeas:
+      {
+        getResponse += String(primaryCurrent, 3);
+      }
+      case (int)GetCommandsIndex::sourceWaterTempIdx: // There is no sensor yet for this 
+      case (int)GetCommandsIndex::freezerTempIdx:
+      case (int)GetCommandsIndex::inletTankThermostatTempIdx:
+      case (int)GetCommandsIndex::inletValvePositionIdx:
+      case (int)GetCommandsIndex::inletWaterTempIdx:
+      {
+        // Send a request to the inlet temperature controller
+        inletGetRequestFlag = true;
+        inletWaterComms.println(getSetCommand + ":");
+      }
+    }
+    if(!inletGetRequestFlag) { Serial.println(getResponse + ":"); }
+  }
+  else if(getSubString(getSetCommand, ':', 0).equalsIgnoreCase("set"))
+  {
+    int setCommand = -1;
+    if(getSubString(getSetCommand, ':', 1).length() > 0) setCommand = getSubString(getSetCommand, ':', 1).toInt();
+    switch(setCommand)
+    {
+      case SetCommandsIndex::outletValveSet:
+      {
+        if (getSubString(getSetCommand, ':', 2).length() > 0) outletValveDir = getSubString(getSetCommand, ':', 2).toInt();
+        if (getSubString(getSetCommand, ':', 3).length() > 0) outletValveStepSize = getSubString(getSetCommand, ':', 3).toInt();
+        outletValveTick = millis();
+      }
+      case SetCommandsIndex::setDeadband:
+      {
+        deadBandMargin = getSubString(getSetCommand, ':', 2).toDouble();
+      }
+      case SetCommandsIndex::powerAvailSet:
+      {
+        if(getSubString(getSetCommand, ':', 2).equalsIgnoreCase("true") || getSubString(getSetCommand, ':', 2).equalsIgnoreCase("1"))
+        {
+          geyserElementPowerAvailable = true;
+        } 
+        else if(getSubString(getSetCommand, ':', 2).equalsIgnoreCase("false") || getSubString(getSetCommand, ':', 2).equalsIgnoreCase("0"))
+        {
+          geyserElementPowerAvailable = false;
+        }
+      }
+      case SetCommandsIndex::setExpParams:
+      {
+        setupExperimentalParameters(getSetCommand, ':', true);
+      }
+      case SetCommandsIndex::setInletValve:
+      case SetCommandsIndex::setInletFreezerTemp:
+      case SetCommandsIndex::setInletGeyserTemp:
+      case SetCommandsIndex::freezerPower:
+      case SetCommandsIndex::inletTankElementPower:
+      {
+        inletSetRequestFlag = true;
+        inletWaterComms.println(getSetCommand + ":");
+      }
+    }
+    if(!inletSetRequestFlag) {Serial.println(setResponse + ":");}
+  }
+}
+
+/*! Function description
   @brief  This function is used to setup the exerimental parameters for the environment to be regulated and for 
           the datasets that will be produced. These parameters include set temperatures, sampling periods, water usage
           schedules and power availability schedules.
   \param portMessage This is the data packet transmitted over the serial port from the User Interface
   \param delimiters The delimiter used to separate the parameters from one another (Usually ":")
 */
-void setupExperimentalParameters(String portMessage, char delimiter)
+void setupExperimentalParameters(String portMessage, char delimiter, bool apiControl)
 {
   // Separate the portMessage into the different information sections
   dataSamplingTime = getSubString(portMessage, delimiter, setupDataOrder::samplingTimeIndex).toInt(); // Set the sampling period of the captured data
     startDataSampleTimer(TC1, 1, TC4_IRQn, dataSamplingTime);
   String setTempsMsg = getSubString(portMessage, delimiter, setupDataOrder::setParamsIndex);
-  inletEnergyInput = getSubString(portMessage, delimiter, setupDataOrder::inletEnergyInputIndex).toInt();
-  String waterEventScheduleMsg = getSubString(portMessage, delimiter, setupDataOrder::waterScheduleIndex);
-  String powerAvailScheduleMsg = getSubString(portMessage, delimiter, setupDataOrder::powerScheduleIndex);
-  // Set all set temperatures from temperature message section
-  for(int i = 0; i < setParamsIndex::setParamsCount; i++)
+  if(!apiControl)
   {
-    systemSetParams[i] = getSubString(setTempsMsg, ',', i).toInt();
-  }
-  // Setup all schedules for water events and consumption volumes
-  numberOfRequestedWaterSchedules = getSubString(waterEventScheduleMsg, ',', 0).toInt();
-  if(numberOfRequestedWaterSchedules <= maxNumOfAlarms)  // Check for max number of alarms allowed
-  {
-    for (int i = 0; i < numberOfRequestedWaterSchedules; i++)
+    if(getSubString(portMessage, delimiter, setupDataOrder::inletEnergyInputIndex).length() > 0) 
     {
-      waterEventSchedules[i].activeAlarm_ = true;
-      waterEventSchedules[i].running_ = false;
-      waterEventSchedules[i].hour_ = getSubString(getSubString(waterEventScheduleMsg, ',', 1 + i*2), 'h', 0).toInt(); // Gets the hour from the string
-      waterEventSchedules[i].minute_ = getSubString(getSubString(waterEventScheduleMsg, ',', 1 + i*2), 'h', 1).toInt(); // Gets the minute 
-      waterEventSchedules[i].consumption = getSubString(waterEventScheduleMsg, ',', 2 + i*2).toDouble();
+      inletEnergyInput = getSubString(portMessage, delimiter, setupDataOrder::inletEnergyInputIndex).toInt();
+    }
+    String waterEventScheduleMsg = getSubString(portMessage, delimiter, setupDataOrder::waterScheduleIndex);
+    String powerAvailScheduleMsg = getSubString(portMessage, delimiter, setupDataOrder::powerScheduleIndex);
+    // Set all set temperatures from temperature message section
+    for(int i = 0; i < setParamsIndex::setParamsCount; i++)
+    {
+      systemSetParams[i] = getSubString(setTempsMsg, ',', i).toInt();
+    }
+    // Setup all schedules for water events and consumption volumes
+    numberOfRequestedWaterSchedules = getSubString(waterEventScheduleMsg, ',', 0).toInt();
+    if(numberOfRequestedWaterSchedules <= maxNumOfAlarms)  // Check for max number of alarms allowed
+    {
+      for (int i = 0; i < numberOfRequestedWaterSchedules; i++)
+      {
+        waterEventSchedules[i].activeAlarm_ = true;
+        waterEventSchedules[i].running_ = false;
+        waterEventSchedules[i].hour_ = getSubString(getSubString(waterEventScheduleMsg, ',', 1 + i*2), 'h', 0).toInt(); // Gets the hour from the string
+        waterEventSchedules[i].minute_ = getSubString(getSubString(waterEventScheduleMsg, ',', 1 + i*2), 'h', 1).toInt(); // Gets the minute 
+        waterEventSchedules[i].consumption = getSubString(waterEventScheduleMsg, ',', 2 + i*2).toDouble();
+      }
+    }
+    // Setup all schedules for power availability
+    numberOfRequestedPowerSchedules = getSubString(powerAvailScheduleMsg, ',', 0).toInt();
+    if(numberOfRequestedPowerSchedules <= maxNumOfAlarms)  // Check for max number of alarms allowed
+    {
+      for (int i = 0; i < numberOfRequestedPowerSchedules; i++)
+      {
+        geyserPowerSchedules[i].activeAlarm_ = true;
+        geyserPowerSchedules[i].running_ = false;
+        geyserPowerSchedules[i].hour_ = getSubString(getSubString(powerAvailScheduleMsg, ',', 1 + i*2), 'h', 0).toInt();
+        geyserPowerSchedules[i].minute_ = getSubString(getSubString(powerAvailScheduleMsg, ',', 1 + i*2), 'h', 1).toInt();
+        geyserPowerSchedules[i].duration_ = getSubString(powerAvailScheduleMsg, ',', 2 + i*2).toDouble();
+      }
     }
   }
- // Setup all schedules for power availability
- numberOfRequestedPowerSchedules = getSubString(powerAvailScheduleMsg, ',', 0).toInt();
- if(numberOfRequestedPowerSchedules <= maxNumOfAlarms)  // Check for max number of alarms allowed
- {
-   for (int i = 0; i < numberOfRequestedPowerSchedules; i++)
-  {
-    geyserPowerSchedules[i].activeAlarm_ = true;
-    geyserPowerSchedules[i].running_ = false;
-    geyserPowerSchedules[i].hour_ = getSubString(getSubString(powerAvailScheduleMsg, ',', 1 + i*2), 'h', 0).toInt();
-    geyserPowerSchedules[i].minute_ = getSubString(getSubString(powerAvailScheduleMsg, ',', 1 + i*2), 'h', 1).toInt();
-    geyserPowerSchedules[i].duration_ = getSubString(powerAvailScheduleMsg, ',', 2 + i*2).toDouble();
-  }
- }
 }
 
 /*! Function description
@@ -933,7 +1078,7 @@ String sampleData()
   chamberDataArray[2] = waterEventTot;
   AccumulatedEnergyPerDataSample = 0.00;
   AccumulatedWaterConsumedPerDataSample = 0.00;
-  waterEventTot = 0.00;
+  waterEventTot += AccumulatedWaterConsumedPerDataSample;
   for(int i = 0; i < numOfChamberTempSensors; i++)
   {
     chamberDataArray[i+3] = climaticChamberTempArray[i];
@@ -1380,31 +1525,53 @@ void controlWaterFlow()
       }
     }
   }
+  if(outletValveStepSize > 0) // API control
+  {
+    if(millis() - outletValveTick > outletValveStepSize)
+    {
+      if(outletValveDir)
+        actuateOutletValve(Open);
+      else 
+        actuateOutletValve(Closed);
+    }
+    else
+    {
+      outletValveStepSize = 0;
+    }
+  }
 }
 
 /*! Function description
   @brief  This function is used to toggle the state (open or close) of the outlet electric ball valve.
   \param valveState determines whether the ball valve opens or closes. If true, the valve opens and vice versa.
 */
-void actuateOutletValve(int valveState)
+void actuateOutletValve(int valveState, int stepSize)
 {
-  if(valveState == Open)
+  if(stepSize == 0)
   {
-    chamberStateFlags[chamberStateIndex::valveState] = Open;
-    digitalWrite(valveClosePin, LOW);
-    digitalWrite(valveOpenPin, HIGH);
+    if(valveState == Open)
+    {
+      chamberStateFlags[chamberStateIndex::valveState] = Open;
+      digitalWrite(valveClosePin, LOW);
+      digitalWrite(valveOpenPin, HIGH);
+    }
+    else if(valveState == Closed)
+    {
+      chamberStateFlags[chamberStateIndex::valveState] = Closed;
+      digitalWrite(valveClosePin, HIGH);
+      digitalWrite(valveOpenPin, LOW);
+    }
+    else if(valveState == NoOutput)
+    {
+      digitalWrite(valveClosePin, LOW);
+      digitalWrite(valveOpenPin, LOW);
+    }
   }
-  else if(valveState == Closed)
+  else 
   {
-    chamberStateFlags[chamberStateIndex::valveState] = Closed;
-    digitalWrite(valveClosePin, HIGH);
-    digitalWrite(valveOpenPin, LOW);
+
   }
-  else if(valveState == NoOutput)
-  {
-    digitalWrite(valveClosePin, LOW);
-    digitalWrite(valveOpenPin, LOW);
-  }
+  
 }
 
 /*! Function description

@@ -10,8 +10,9 @@ double boilerProfileTempArray[boilerProfileBusNumber][maxSensorsPerBus] = {};
 
 // Define the temperature sensor address register for the climatic chamber, outside the geyser.
 enum climaticChamberTempNames   {geyserWaterTempAddress, inletWaterAddress, outletWaterAddress,\
+                                topSurfaceGeyserTempAddress, bottomSurfaceGeyserTempAddress,
                                 outsideTempAddress, amb1TempAddress, amb2TempAddress, \
-                                topSurfaceGeyserTempAddress, bottomSurfaceGeyserTempAddress};  // This enumeration is used to assign the indices to names for better readibility
+                                };  // This enumeration is used to assign the indices to names for better readibility
 const int numOfChamberTempSensors = 8;  // Look at array below for size
 double climaticChamberTempArray[numOfChamberTempSensors] = {};  // This global variable will store the instantanious temperature values obtained from the climatic chamber test station
 const DeviceAddress climaticChamberTempReg[numOfChamberTempSensors] =    {

@@ -76,9 +76,23 @@ enum incomingCMDs : int {stopSystem, startSystem, setupSytem, resetSystem, share
 enum busDeviceCount{bus0DeviceCount = 9, bus1DeviceCount = 9, bus2DeviceCount = 9, bus3DeviceCount = 9, bus4DeviceCount = 6,\
                     bus5DeviceCount = 8, bus6DeviceCount = 8, bus7DeviceCount = 8};
 enum externADCPins{currentPin, currentVrefPin, pressurePin, voltagePin};
+        enum GetCommandsIndex : int
+        {
+          flowRateIdx, powerUsageIdx, labTempIdx, outletTempIdx, geyserThermistorTempIdx, \
+          busTempVectorIdx, geyserSurfaceTempIdx, chamberTempIdx, chamberFansIdx, sourceWaterTempIdx, \
+          inletWaterTempIdx, freezerTempIdx, inletTankThermostatTempIdx, inletValvePositionIdx, currentMeas,\
+          getDeadband
+        };
+        enum SetCommandsIndex : int
+        {
+          outletValveSet, setInletTemp = 1, powerAvailSet = 2, setInletValve = 3, setInletFreezerTemp = 4, setExpParams = 5, \
+          setInletGeyserTemp = 6, freezerPower = 7, inletTankElementPower = 8, setDeadband = 9 
+        };
 /** Define general parameters used by source code **/
 const int sensorErrorNum = DEVICE_DISCONNECTED_C;     // Value that will be displayed if temp sensors are disconnected
 const double max12BitNum = 4095;
+bool inletGetRequestFlag = false;
+bool inletSetRequestFlag = false;
 const double currentSensorRated = 20.0;
 const double currentSensorRange = 30.0;
 const uint32_t SerialBaudrate = 115200;  // Baud rate for serial communication
@@ -118,6 +132,8 @@ bool internalADCflag = false;
 bool firstRequestChamberTemp = true;
 bool firstRequestBoilerTemp = true;
 bool chamberHeatCheckFlag = false;
+bool outletValveDir = false;
+int outletValveStepSize = 0;
 volatile bool inletSetUpdate = false;
 volatile bool systemUpdateFlag = false;
 volatile bool sampleDataFlag = false;
@@ -182,6 +198,7 @@ unsigned long prevWaterSampleTime = 0;
 unsigned long prevDataSampleTick = 0;
 unsigned long currentLoopTick = 0;
 unsigned long prevSystemSampleTick = 0; 
+unsigned long outletValveTick = 0;
 int outletValvePosTime = 0;
 
 // Set default DAQ parameters
@@ -262,7 +279,7 @@ void printOutTemperatureMatrix();
 void createTempProfileStringArray();
 String createFinalDataString();
 void configurePins();
-void setupExperimentalParameters(String portMessage, char delimiter);
+void setupExperimentalParameters(String portMessage, char delimiter, bool apiControl = false);
 void sendDataToComputer(String dataString);
 void sendDataToCloud();
 void sendDiagnosticsToComputer();
@@ -280,7 +297,7 @@ bool checkWifiMesgAvailable();
 String getSubString(String data, char separator, int index);
 void waitForResponse(long waitingTime);
 void captureTemperatureData(bool captureBoilerData = false);
-void actuateOutletValve(int valveState);
+void actuateOutletValve(int valveState,int stepSize = 0);
 void actuateGeyserElement(bool powerAvailable, bool elementState);
 void actuateHeatingFans(bool heatingElementState, bool fanState);
 void actuateVentingFans(bool fanState);
@@ -318,4 +335,5 @@ void startSystemUpdateTimer(Tc *tc, uint32_t channel, IRQn_Type irq, uint32_t fr
 void startPowerSamplingTimer(Tc *tc, uint32_t channel, IRQn_Type irq, uint32_t frequency);
 void updateDisplay();
 int calcPIDoutput(double flowRateError);
+void readGetSetCommand(String getCommand);
 #endif
