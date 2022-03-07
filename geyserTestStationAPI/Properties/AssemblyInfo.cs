@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TestStationAPI_2")]
+[assembly: AssemblyTitle("geyserTestStationAPI")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("HP Inc.")]
-[assembly: AssemblyProduct("TestStationAPI_2")]
+[assembly: AssemblyProduct("geyserTestStationAPI")]
 [assembly: AssemblyCopyright("Copyright © HP Inc. 2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("994000aa-fb75-43da-8237-2da77511e05a")]
+[assembly: Guid("efd6659f-7de9-4286-9352-0e17f94214f2")]
 
 // Version information for an assembly consists of the following four values:
 //
