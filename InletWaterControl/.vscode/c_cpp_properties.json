@@ -1,0 +1,107 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/include",
+                "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/src",
+                "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/U8g2/src",
+                "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/Adafruit SSD1306",
+                "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/Adafruit GFX Library",
+                "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/Adafruit BusIO",
+                "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/Adafruit PWM Servo Driver Library",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/Wire",
+                "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/DallasTemperature",
+                "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/OneWire",
+                "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/ArduinoMqttClient/src",
+                "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/WiFiNINA/src",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SPI",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/cores/arduino/api/deprecated",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/cores/arduino/api/deprecated-avr-comp",
+                "C:/Users/pdvs1/.platformio/packages/framework-cmsis@1.40500.0/CMSIS/Include",
+                "C:/Users/pdvs1/.platformio/packages/framework-cmsis-atmel/CMSIS/Device/ATMEL",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/cores/arduino",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/variants/nano_33_iot",
+                "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/U8glib/src",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/HID",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/I2S/src",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SAMD_AnalogCorrection/src",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SAMD_BootloaderUpdater/src",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SBU/src",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SDU/src",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SFU/src",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SNU/src",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SSU/src",
+                "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/USBHost/src",
+                "C:/Users/pdvs1/.platformio/packages/tool-unity",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/include",
+                    "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/src",
+                    "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/U8g2/src",
+                    "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/Adafruit SSD1306",
+                    "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/Adafruit GFX Library",
+                    "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/Adafruit BusIO",
+                    "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/Adafruit PWM Servo Driver Library",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/Wire",
+                    "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/DallasTemperature",
+                    "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/OneWire",
+                    "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/ArduinoMqttClient/src",
+                    "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/WiFiNINA/src",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SPI",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/cores/arduino/api/deprecated",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/cores/arduino/api/deprecated-avr-comp",
+                    "C:/Users/pdvs1/.platformio/packages/framework-cmsis@1.40500.0/CMSIS/Include",
+                    "C:/Users/pdvs1/.platformio/packages/framework-cmsis-atmel/CMSIS/Device/ATMEL",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/cores/arduino",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/variants/nano_33_iot",
+                    "c:/Users/pdvs1/Documents/PlatformIO/Projects/InletWaterControl/.pio/libdeps/nano_33_iot/U8glib/src",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/HID",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/I2S/src",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SAMD_AnalogCorrection/src",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SAMD_BootloaderUpdater/src",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SBU/src",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SDU/src",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SFU/src",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SNU/src",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/SSU/src",
+                    "C:/Users/pdvs1/.platformio/packages/framework-arduino-samd/libraries/USBHost/src",
+                    "C:/Users/pdvs1/.platformio/packages/tool-unity",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=50205",
+                "ARDUINO_SAMD_NANO_33_IOT",
+                "CRYSTALLESS",
+                "__SAMD21G18A__",
+                "ARDUINO=10805",
+                "F_CPU=48000000L",
+                "USBCON",
+                "USB_VID=0x2341",
+                "USB_PID=0x8057",
+                "USB_PRODUCT=\"Arduino NANO 33 IoT\"",
+                "USB_MANUFACTURER=\"Arduino\"",
+                "ARDUINO_ARCH_SAMD",
+                ""
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "compilerPath": "C:/Users/pdvs1/.platformio/packages/toolchain-gccarmnoneeabi@1.70201.0/bin/arm-none-eabi-gcc.exe",
+            "compilerArgs": [
+                "-mcpu=cortex-m0plus",
+                "-mthumb",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}
