@@ -49,7 +49,7 @@ namespace geyserTestStationAPI
                 {(int)SetCommandsIndex.setExpParams, "set:" + ((int)SetCommandsIndex.setExpParams).ToString()},
                 {(int)SetCommandsIndex.setInletGeyserTemp, "set:" + ((int)SetCommandsIndex.setInletGeyserTemp).ToString()}
             };
-        public SerialPort SerialPort = new SerialPort();
+        public SerialPort mySerialPort = new SerialPort();
         private string[] BaudRates_ = { "9600", "115200", "256000" };
 
         // Constructor
@@ -62,35 +62,49 @@ namespace geyserTestStationAPI
         private void SendCommandPackage(String commandString)
         {
             // Use serial port to send requested command to controller
-            if (SerialPort.IsOpen)
-                SerialPort.WriteLine(commandString);
+            if (mySerialPort.IsOpen)
+                mySerialPort.WriteLine(commandString);
             else
                 Console.WriteLine("Serial port has not been not been opened");
         }
 
+        public string CaptureSerialResponse()
+        {
+            string portMessage = "";
+            if(mySerialPort.IsOpen)
+            {
+               portMessage =  mySerialPort.ReadLine();
+            }
+            else
+            {
+                Console.WriteLine("Serial port not opened...");
+            }
+            return portMessage;
+        }
+
         public void CloseSerialPort()
         {
-            if (SerialPort.IsOpen)
-                SerialPort.Close();
+            if (mySerialPort.IsOpen)
+                mySerialPort.Close();
             else
                 Console.WriteLine("Serial port already closed");
         }
 
         public SerialPort OpenSerialPort(String portName)
         {
-            if(!SerialPort.IsOpen)
+            if(!mySerialPort.IsOpen)
             {
-                SerialPort.BaudRate = int.Parse(BaudRates_[1]);
-                SerialPort.PortName = portName;
-                SerialPort.Handshake = Handshake.None;
-                SerialPort.Parity = Parity.None;
-                SerialPort.Open();
+                mySerialPort.BaudRate = int.Parse(BaudRates_[1]);
+                mySerialPort.PortName = portName;
+                mySerialPort.Handshake = Handshake.None;
+                mySerialPort.Parity = Parity.None;
+                mySerialPort.Open();
             }
             else
             {
                 Console.WriteLine("Serial port already open");
             }
-            return SerialPort;
+            return mySerialPort;
         }
 
         // *** Get functions for sensor measurements ***
