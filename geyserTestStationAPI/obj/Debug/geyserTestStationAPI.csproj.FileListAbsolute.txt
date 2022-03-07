@@ -4,3 +4,9 @@ C:\Users\pdvs1\OneDrive - Stellenbosch University\Master's Thesis\Code\geyserTes
 C:\Users\pdvs1\OneDrive - Stellenbosch University\Master's Thesis\Code\geyserTestStationAPI\obj\Debug\geyserTestStationAPI.csproj.CoreCompileInputs.cache
 C:\Users\pdvs1\OneDrive - Stellenbosch University\Master's Thesis\Code\geyserTestStationAPI\obj\Debug\geyserTestStationAPI.dll
 C:\Users\pdvs1\OneDrive - Stellenbosch University\Master's Thesis\Code\geyserTestStationAPI\obj\Debug\geyserTestStationAPI.pdb
+C:\Users\pdvs1\OneDrive - Stellenbosch University\Master's Thesis\Code\Test-Station-Source-Code\geyserTestStationAPI\bin\Debug\geyserTestStationAPI.dll
+C:\Users\pdvs1\OneDrive - Stellenbosch University\Master's Thesis\Code\Test-Station-Source-Code\geyserTestStationAPI\bin\Debug\geyserTestStationAPI.pdb
+C:\Users\pdvs1\OneDrive - Stellenbosch University\Master's Thesis\Code\Test-Station-Source-Code\geyserTestStationAPI\obj\Debug\geyserTestStationAPI.csproj.AssemblyReference.cache
+C:\Users\pdvs1\OneDrive - Stellenbosch University\Master's Thesis\Code\Test-Station-Source-Code\geyserTestStationAPI\obj\Debug\geyserTestStationAPI.csproj.CoreCompileInputs.cache
+C:\Users\pdvs1\OneDrive - Stellenbosch University\Master's Thesis\Code\Test-Station-Source-Code\geyserTestStationAPI\obj\Debug\geyserTestStationAPI.dll
+C:\Users\pdvs1\OneDrive - Stellenbosch University\Master's Thesis\Code\Test-Station-Source-Code\geyserTestStationAPI\obj\Debug\geyserTestStationAPI.pdb

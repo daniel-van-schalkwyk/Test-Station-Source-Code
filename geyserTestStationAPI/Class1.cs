@@ -55,57 +55,69 @@ namespace geyserTestStationAPI
         // Constructor
         public geyserTestStationAPI()
         {
-            SerialPortSetup();  // Configure Serial Port for controller communication
+            //SerialPortSetup();  // Configure Serial Port for controller communication
         }
 
         // General commands
         private void SendCommandPackage(String commandString)
         {
             // Use serial port to send requested command to controller
-            SerialPort_.WriteLine(commandString);
-        }
-
-        private void SerialPortSetup()
-        {
-            SerialPort_.BaudRate = int.Parse(BaudRates_[1]);
-            string[] portNames = SerialPort.GetPortNames();
-            SerialPort_.PortName = portNames[portNames.Length - 1];
-            SerialPort_.Handshake = Handshake.None;
-            SerialPort_.Parity = Parity.None;
-            SerialPort_.Open();
+            if (SerialPort_.IsOpen)
+                SerialPort_.WriteLine(commandString);
+            else
+                Console.WriteLine("Serial port has not been not been opened");
         }
 
         public void CloseSerialPort()
         {
-            SerialPort_.Close();
+            if (SerialPort_.IsOpen)
+                SerialPort_.Close();
+            else
+                Console.WriteLine("Serial port already closed");
+        }
+
+        public void OpenSerialPort()
+        {
+            if(!SerialPort_.IsOpen)
+            {
+                SerialPort_.BaudRate = int.Parse(BaudRates_[1]);
+                string[] portNames = SerialPort.GetPortNames();
+                SerialPort_.PortName = portNames[portNames.Length - 1];
+                SerialPort_.Handshake = Handshake.None;
+                SerialPort_.Parity = Parity.None;
+                SerialPort_.Open();
+            }
+            else
+            {
+                Console.WriteLine("Serial port already open");
+            }
         }
 
         // *** Get functions for sensor measurements ***
 
         // User / Eskom / Atmospheric commands
-        public double GetFlowRate()
+        public String GetFlowRate()
         {
-            String flowRate = "";
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.flowRate];
             // Get the flow rate from the controller 
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.flowRate]);
-            return Double.Parse(flowRate);
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
         public String RequestTemperatureBus(int busNumber)
         {
-            String busTempString = "";
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.busTempVector] + ":" + busNumber.ToString();
             // Get the flow rate from the controller 
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.busTempVector] + ":" + busNumber.ToString());
-
-            return busTempString;
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
-        public double GetGeyserThermostatTemperature()
+        public String GetGeyserThermostatTemperature()
         {
-            string thermostatTemperature = "";
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.geyserThermistorTemp];
             // Get the thermostat temperature from the controller 
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.geyserThermistorTemp]);
-            return Double.Parse(thermostatTemperature);
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
         public bool GetElementPowerState()
@@ -114,112 +126,124 @@ namespace geyserTestStationAPI
             return false;
         }
 
-        public double GetElementPowerUsage()
+        public String GetElementPowerUsage()
         {
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.powerUsage]);
-
-            return 0;
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.powerUsage];
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
-        public double GetLabTemperature()
+        public String GetLabTemperature()
         {
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.labTemp]);
-
-            return 0;
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.labTemp];
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
-        public double GetOutletTemperature()
+        public String GetOutletTemperature()
         {
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.outletTemp]);
-
-            return 0;
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.outletTemp];
+           this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
-        public double GetInletTemperature()
+        public String GetInletTemperature()
         {
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.inletWaterTemp]);
-            return 0;
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.inletWaterTemp];
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
-        public double GetGeyserSurfaceTemperatures()
+        public String GetGeyserSurfaceTemperatures()
         {
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.geyserSurfaceTemp]);
-            return 0;
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.geyserSurfaceTemp];
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
-        public double GetChamberTemperature()
+        public String GetChamberTemperature()
         {
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.chamberTemp]);
-
-            return 0;
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.chamberTemp];
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
-        public double GetChamberFanStatus()
+        public String GetChamberFanStatus()
         {
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.chamberFans]);
-
-            return 0;
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.chamberFans];
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
-        public double GetWaterSourceTemperature()
+        public String GetWaterSourceTemperature()
         {
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.sourceWaterTemp]);
-
-            return 0;
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.sourceWaterTemp];
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
-        public double GetInletFreezerTemperature()
+        public String GetInletFreezerTemperature()
         {
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.freezerTemp]);
-
-            return 0;
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.freezerTemp];
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
-        public double GetInletTankThermostatTemperature()
+        public String GetInletTankThermostatTemperature()
         {
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.inletTankThermostatTemp]);
-
-            return 0;
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.inletTankThermostatTemp];
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
-        public double GetInletValveAngle()
+        public String GetInletValveAngle()
         {
-            this.SendCommandPackage(this.GetCommands[(int)GetCommandsIndex.inletValvePosition]);
-
-            return 0;
+            String getMessage = this.GetCommands[(int)GetCommandsIndex.inletValvePosition];
+            this.SendCommandPackage(getMessage);
+            return getMessage;
         }
 
         // Set functions for Actuators
 
-        public void SetOutletValveStep(int stepSize, bool direction)
+        public String SetOutletValveStep(int stepSize, int direction)
         {
-            this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.outletValveSet] + "," + direction.ToString() + "," + stepSize.ToString());
+            String setMessage = this.SetCommands[(int)SetCommandsIndex.outletValveSet] + ":" + direction.ToString() + ":" + stepSize.ToString();
+            this.SendCommandPackage(setMessage);
+            return setMessage;
         }
 
-        public void SetElementElectricitySupply(bool state)
+        public String SetElementElectricitySupply(int state)
         {
-            this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.powerAvailSet] + "," + state.ToString());
+            String setMessage = this.SetCommands[(int)SetCommandsIndex.powerAvailSet] + ":" + state.ToString();
+            this.SendCommandPackage(setMessage);
+            return setMessage;
         }
 
-        public void SetInletValveAngle(double angle)
+        public String SetInletValveAngle(double angle)
         {
+            String setMessage = this.SetCommands[(int)SetCommandsIndex.powerAvailSet] + ":" + angle.ToString();
             if (angle > 90 || angle < 0)
                 Console.WriteLine("Inlet servo valve angle must be in the range of 0 to 90 degrees");
             else
-                this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.powerAvailSet] + "," + angle.ToString());
+                this.SendCommandPackage(setMessage);
+            return setMessage;
         }
 
-        public void SetInletFreezerTemperature(double freezerTemp)
+        public String SetInletFreezerTemperature(double freezerTemp)
         {
-            this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.setInletFreezerTemp] + "," + freezerTemp.ToString());
+            String setMessage = this.SetCommands[(int)SetCommandsIndex.setInletFreezerTemp] + ":" + freezerTemp.ToString();
+            this.SendCommandPackage(setMessage);
+            return setMessage;
         }
 
-        public void SetInletGeyserTemperature(double inletGeyserTemp)
+        public String SetInletGeyserTemperature(double inletGeyserTemp)
         {
-            this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.setInletGeyserTemp] + "," + inletGeyserTemp.ToString());
+            String setMessage = this.SetCommands[(int)SetCommandsIndex.setInletGeyserTemp] + ":" + inletGeyserTemp.ToString(); 
+            this.SendCommandPackage(setMessage);
+            return setMessage;
         }
 
-        public void SetExperimentalParameters(int sampleTime, double geyserSetTemp, double chamberSetTemp, double inletSetTemp, double waterFlowRate)
+        public String SetExperimentalParameters(int sampleTime, double geyserSetTemp, double chamberSetTemp, double inletSetTemp, double waterFlowRate)
         {
             var experimentalCommand = new StringBuilder("");
             experimentalCommand.Append(this.SetupCMD).Append(',')
@@ -228,8 +252,10 @@ namespace geyserTestStationAPI
                                .Append(geyserSetTemp).Append(',')
                                .Append(inletSetTemp).Append(',')
                                .Append(waterFlowRate);
+            String setMessage = this.SetCommands[(int)SetCommandsIndex.setExpParams] + ":" + experimentalCommand.ToString();
             // Send configuration string to controller via serial port
-            this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.setExpParams] + "," + experimentalCommand.ToString());
+            this.SendCommandPackage(setMessage);
+            return setMessage;
         }
     }
 }
