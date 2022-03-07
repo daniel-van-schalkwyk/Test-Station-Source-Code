@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO.Ports;
 
-namespace TestStationAPI
+namespace geyserTestStationAPI
 {
-    public class TestStationCommandInterface
+    public class geyserTestStationAPI
     {
         // Properties 
         public String SetupCMD = "2:1";
@@ -53,7 +53,7 @@ namespace TestStationAPI
         private string[] BaudRates_ = { "9600", "115200", "256000" };
 
         // Constructor
-        public TestStationCommandInterface()
+        public geyserTestStationAPI()
         {
             SerialPortSetup();  // Configure Serial Port for controller communication
         }
@@ -205,7 +205,7 @@ namespace TestStationAPI
         {
             if (angle > 90 || angle < 0)
                 Console.WriteLine("Inlet servo valve angle must be in the range of 0 to 90 degrees");
-            else 
+            else
                 this.SendCommandPackage(this.SetCommands[(int)SetCommandsIndex.powerAvailSet] + "," + angle.ToString());
         }
 
