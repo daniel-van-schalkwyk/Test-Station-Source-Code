@@ -1,7 +1,7 @@
 #ifndef temp_sensor_address_reg_H
 #define temp_sensor_address_reg_H
 
-#include "geyser_daq_controller.h"
+#include "GeyserDaqController.h"
 
 // Define the temperature sensor address register for the internal boiler temperature data acquisition system.
 const int boilerProfileBusNumber = 8;    // Number of OneWire buses to use for the boiler DAQ

@@ -22,8 +22,12 @@ namespace geyserInterfaceScript
             // ** Add get and set messages here ** 
             // Example: 
             geyserObject.SetElementElectricitySupply((int)states.On);
+            geyserObject.GetLabTemperature();
             
             var mcuResponse = geyserObject.CaptureSerialResponse(); // Read response (Might need to use a delegate for this)
+
+            Console.WriteLine(mcuResponse);
+            
 
         }
     }

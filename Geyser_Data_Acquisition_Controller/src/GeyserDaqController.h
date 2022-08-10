@@ -169,7 +169,7 @@ struct PID_params
   double Kd;
   double e_sum;
   double e_prev;
-}PIDout;
+} PIDout;
 // Declare state machine states and flags
 bool valveOpen = false;
 bool ambientReady = false;

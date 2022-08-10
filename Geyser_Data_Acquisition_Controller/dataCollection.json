@@ -1,0 +1,173 @@
+{
+    "MetaData" : 
+    {
+        "SamplingRate" : 5, 
+        "OperatorName" : "Daniel van Schalkwyk", 
+        "GeneralInfo" : "Some text here"
+    },
+    "DataCollection": 
+    [
+        {
+            "TimeStamp": "2022-01-07T15:51:42",
+            "SetParameters" :
+            {
+                "ChamberSetTemp": 0.00, 
+                "GeyserWaterSetTemp": 0.00, 
+                "InletWaterSetTemp": 0.00, 
+                "DesiredFlowRate": 0.00
+            }, 
+            "RegulationFlags" :
+            {
+                "ChamberAirTempReg" : true, 
+                "GeyserWaterTempReg" : false, 
+                "InletWaterTempReg" : true, 
+                "FlowRateReg" : true, 
+                "WaterScheduleControl" : true, 
+                "PowerScheduleControl" : false
+            },
+            "TestBenchStates" : 
+            {
+                "ChamberHeatingFans" : true, 
+                "ChamberVentingFans" : false, 
+                "CirculationFans" : true, 
+                "ChamberHeatingElement" : true, 
+                "WaterValveState" : false, 
+                "GeyserHeatingFlag" : true
+            },
+            "ExternalMeasurements" : 
+            {
+                "PowerConsumed" : 0.00,
+                "WaterConsumed" : 0.00,
+                "TotalWaterConsumed" : 0.00, 
+                "GeyserWaterThermostatTemp" : 0.00,
+                "InletWaterTemp" : 0.00,
+                "OutletWaterTemp" : 0.00, 
+                "TopGeyserSurfaceTemp" : 0.00, 
+                "BotGeyserSurfaceTemp" : 0.00, 
+                "LabTemp" : 0.00,
+                "MeanChamberTemp" : 0.00
+
+            }, 
+            "InternalTankTemperatures":
+            {
+                "Bus0" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ], 
+                "Bus1" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ],
+                "Bus2" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ], 
+                "Bus3" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ],
+                "Bus4" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ], 
+                "Bus5" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ],
+                "Bus6" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ],
+                "Bus7" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ],
+                "Bus8" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ]
+            }
+        }, 
+        {
+            "TimeStamp": "2022-01-07T15:51:47",
+            "SetParameters" :
+            {
+                "ChamberSetTemp": 0.00, 
+                "GeyserWaterSetTemp": 0.00, 
+                "InletWaterSetTemp": 0.00, 
+                "DesiredFlowRate": 0.00
+            }, 
+            "RegulationFlags" :
+            {
+                "ChamberAirTempReg" : true, 
+                "GeyserWaterTempReg" : false, 
+                "InletWaterTempReg" : true, 
+                "FlowRateReg" : true, 
+                "WaterScheduleControl" : true, 
+                "PowerScheduleControl" : false
+            },
+            "TestBenchStates" : 
+            {
+                "ChamberHeatingFans" : true, 
+                "ChamberVentingFans" : false, 
+                "CirculationFans" : true, 
+                "ChamberHeatingElement" : true, 
+                "WaterValveState" : false, 
+                "GeyserHeatingFlag" : true
+            },
+            "ExternalMeasurements" : 
+            {
+                "PowerConsumed" : 0.00,
+                "WaterConsumed" : 0.00,
+                "TotalWaterConsumed" : 0.00, 
+                "GeyserWaterThermostatTemp" : 0.00,
+                "InletWaterTemp" : 0.00,
+                "OutletWaterTemp" : 0.00, 
+                "TopGeyserSurfaceTemp" : 0.00, 
+                "BotGeyserSurfaceTemp" : 0.00, 
+                "LabTemp" : 0.00,
+                "MeanChamberTemp" : 0.00
+
+            }, 
+            "InternalTankTemperatures":
+            {
+                "Bus0" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ], 
+                "Bus1" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ],
+                "Bus2" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ], 
+                "Bus3" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ],
+                "Bus4" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ], 
+                "Bus5" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ],
+                "Bus6" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ],
+                "Bus7" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ],
+                "Bus8" : 
+                [
+                    0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+                ]
+            }
+        }
+    ]
+}

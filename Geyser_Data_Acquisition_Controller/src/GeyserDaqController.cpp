@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*! Source code overview and description
+/** 
   @section Source code overview
 
   This software serves as a control algorithm for a geyser boiler temperature data acquisition system. 
@@ -31,8 +31,13 @@
 /**************************************************************************/
 
 // Include all header files
-#include "geyser_daq_controller.h"
+#include "GeyserDaqController.h"
 
+/**
+  @brief  Program setup sequence: Responsible for setting up all peripherals of microcontroller,
+          configuring pins and setting initial actuator states. This is done before the main progarm 
+          loop.
+*/
 void setup() 
 { 
   Serial.begin(SerialBaudrate);
@@ -47,12 +52,14 @@ void setup()
   configureADS1115(GAIN_ONE);
   wifiSetup();
   timerSetup();
-  Serial.print("Setup Complete");
+  Serial.print("Setup stage complete");
 }
 
+/**
+  @brief  Main program loop of the microcontroller board.  
+*/
 void loop() 
 {
-  
   setCurrentTime(&currentLoopTime);
   currentLoopTick = millis();
   checkWifiMesgAvailable();
@@ -100,15 +107,16 @@ void loop()
   updateDisplay(); // Update parameters on the OLED screen
 }
 
-/*! Function description
+/**
   @brief   
 */
+
 void sendDataToCloud()
 {
-  // Still need to complete this after I get the Wifi working
+  // TODO: Complete this after I get the Wifi working
 }
 
-/*! Function description
+/** 
   @brief  This function is used to configure a few of the Arduino Due's timers for 
           data actuisition and actuation timing control within the control script
 */
@@ -119,15 +127,18 @@ void timerSetup()
   startDataSampleTimer(TC1, 1, TC4_IRQn, dataSamplingTime);  // Interrupt timer will execute every 5 seconds (0.2 Hz)
   startSystemUpdateTimer(TC1, 0, TC3_IRQn, systemUpdateTime); // Interrupt timer will execute every 1 seconds (1 Hz)
   startPowerSamplingTimer(TC1, 2, TC5_IRQn, PowerSamplingFreq); // Interrupt timer will execute at 1.25 kHz
+  // TODO: Need to documnet properly why these timers are used! Look at One Note docs
 }
 
+/** 
+  @brief  This function is used when a I2C device needs to be detected on
+          an assigned bus
+*/
 void i2cScanner()
 {
   byte error, address;
   int nDevices;
- 
   Serial.println("Scanning...");
- 
   nDevices = 0;
   for(address = 1; address < 127; address++ )
   {
@@ -187,7 +198,7 @@ String generateColumnHeaders()
   return finalColumnHeaders;
 }
 
-/*! Function description
+/** Function description
   @brief  This function is used to send the system diagnostics of the microcontroller to the UI computer. 
           This information includes any system errors, number of sensors connected, and any other meta data available.
 */
@@ -199,7 +210,7 @@ void sendDiagnosticsToComputer()
   Serial.println("Done");
 }
 
-/*! Function description
+/** 
   @brief  This function is used to set the time parameters of a time structure variable passed 
           to the function. 
   \param  *requestedTime A predefined time structure type pointer variable   
@@ -214,7 +225,7 @@ void setCurrentTime(dueTimeAndDate *requestedTime)
   requestedTime->second_ = dueRTC.getSeconds();
 }
 
-/*! Function description
+/*!
   @brief  This function is used to send a copy of the data sent to the SD card to the computer over the serial port.
   \param  dataString This variable contains the system data string to be sent over serial to the UI computer
 */
@@ -224,10 +235,9 @@ void sendDataToComputer(String dataString)
   Serial.println(dataString);
   Serial.println("Done");
   Serial.flush();
-  // printOutTemperatureMatrix();
 }
 
-/*! Function description
+/**
   @brief  This is a setup function and is used to configure all the onewire sensors in the system
           It instantiates an array of DallasTemperature objects and configures all elements to the
           same specifications. 
@@ -263,7 +273,7 @@ void oneWireSetup()
     }
 }
 
-/** Function description
+/** 
  * \brief This function is used to update the parameters on the provided OLED screen on the controller.
  */
 void updateDisplay()
@@ -276,6 +286,9 @@ void updateDisplay()
   printToOLED(screenBuffer);
 }
 
+/** 
+ * \brief This function is used check if there is a wifi message available on the serial port
+ */
 bool checkWifiMesgAvailable()
 {
   bool wifiMesgAvailable = false;
@@ -288,12 +301,12 @@ bool checkWifiMesgAvailable()
   return wifiMesgAvailable;
 } 
 
-void wifiSetup()  // TO:DO !!
+void wifiSetup()  
 {
-
+  // TODO: Need to implement the WiFi setup when I get time
 }
 
-/** Function Ddscription
+/** 
  * \brief This is a setup function for the SD card functionality. 
  * \return sdCardSuccess - a flag to indicate if the SD card initialisation was successful
  */
@@ -314,7 +327,7 @@ bool sdCardSetup()
   return sdCardSuccess;
 }
 
-/** Function Ddscription
+/** 
  * \brief This function is used to create a filename for the SD card data set file 
  * \return fileName - The name of the file to use
  */
@@ -334,7 +347,7 @@ String createFileName(dueTimeAndDate *date_time, String extension)
   return fileName;
 }
 
-/** Function Ddscription
+/** 
  * \brief This function is called when data needs to be streamed to the available SD card
  * \param dataString  The string of data that needs to be sent to the SD card as an data entry.
  */
@@ -375,7 +388,7 @@ void sendDataToSD(String dataString)
   }
 }
 
-/** Function Ddscription
+/** 
  * \brief This function is used to check if all the DS18B20 temperature sensors are connected on the specified bus.
  * \param busNumber The DS18B20 bus number to check if all sensors are connected.
  * \param sensorCountOnBus  The number of sensors detected 
@@ -404,7 +417,7 @@ bool checkSensorCountOnBus(int busNumber, int sensorCountOnBus)
   return allSensorsConnected;
 }
 
-/** Function Ddscription
+/** 
  * \brief This function is used to find all oneWire device addresses on all DS18B20 sensor buses.
  *        The function will print out all the device addresses of every sensor on all buses.
  */
@@ -441,7 +454,7 @@ void discoverOneWireDevices()
   return;
 }
 
-/** Function Ddscription
+/** 
  * \brief This function is used separate a string variable using delimeters
  * \param data  The entire string to be separated
  * \param separator The character delimiter used to split the data string
@@ -483,7 +496,7 @@ void waitForResponse(long waitingTime)
 }
 
 /** Function description
- * \brief This function is used to send inlet control parameters to the inlet controller
+ * \brief This function is used to send inlet control parameters to the inlet controller of the test bench if it is needed
  */
 void sendInletControlParams()
 {
@@ -525,7 +538,7 @@ void readIncomingSerialMessage(int serialPort)
   {
     readGetSetCommand(portMessage); 
   }
-  else if(getSubString(portMessage, ':', 0).equalsIgnoreCase("SVP")) // if Outlet Servo Valve Position is received
+  else if(getSubString(portMessage, ':', 0).equalsIgnoreCase("SVP")) // if system inlet Servo Valve Position is received
   {
     inletWaterComms.println("SVP:" + String(getSubString(portMessage, ':', 1).toInt()));
     inletWaterComms.flush();

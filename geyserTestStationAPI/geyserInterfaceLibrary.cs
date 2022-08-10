@@ -22,7 +22,7 @@ namespace geyserTestStationAPI
         {
             outletValveSet, powerAvailSet, setInletValve, setInletFreezerTemp, setExpParams, setInletGeyserTemp
         };
-        public Dictionary<int, String> GetCommands = new Dictionary<int, String>()
+         public Dictionary<int, String> GetCommands = new Dictionary<int, String>()
             {
                 {(int)GetCommandsIndex.flowRate, "get:" + ((int)GetCommandsIndex.flowRate).ToString()},
                 {(int)GetCommandsIndex.powerUsage, "get:" + ((int)GetCommandsIndex.powerUsage).ToString()},
