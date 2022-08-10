@@ -549,87 +549,96 @@ void readIncomingSerialMessage(int serialPort)
   }
   else
   {
-    int messageCMD = getSubString(portMessage, ':', 0).toInt();
-    switch (messageCMD)
-    {
-      case incomingCMDs::startSystem:
-      {
-        if(getSubString(portMessage, ':', 1).toInt())
-        {
-          systemStateFlags[runState] = true;
-          systemStateFlags[idleState] = false;
-          systemStateFlags[setupState] = false;
-          Serial.println("System in RUN state");
-        }
-        else
-        {
-          systemStateFlags[runState] = false;
-          systemStateFlags[idleState] = true;
-        }
-        break;
-      }
-      case incomingCMDs::stopSystem:
-      {
-        stopSys();
-        if(getSubString(portMessage, ':', 1).toInt()) // If the stop command is reliable from UI (double check)
-        {
-          systemStateFlags[runState] = false;
-          systemStateFlags[idleState] = true;
-          Serial.println("System in IDLE state");
-        }
-        break;
-      }
-      case incomingCMDs::setupSytem:
-      {
-        if(getSubString(portMessage, ':', 1).toInt()) // If the setup command and info is reliable from UI (double check)
-        {
-          systemStateFlags[runState] = false;
-          systemStateFlags[idleState] = true;
-          systemStateFlags[setupSytem] = true;
-          Serial.println("System in SETUP state");
-          setupExperimentalParameters(portMessage, ':');
-          setTemperatureRegulationFlags();  // Determine if temperature regulation is requested by the UI 
-        }
-        break;
-      }
-      case incomingCMDs::resetSystem:
-      {
-        resetMCU();  // Microcontroller will reset script
-        Serial.println("System reset failed..."); // This shouldn't execute, but iof it does the reset isn't working.
-        systemStateFlags[idleState] = true;
-        break;
-      }
-      case incomingCMDs::shareData:
-      {
-        systemStateFlags[shareState] = (getSubString(portMessage, ':', 1).toInt()) ? true : false;
-        break;
-      }
-      case incomingCMDs::viewData:
-      {
-        systemStateFlags[viewState] = (getSubString(portMessage, ':', 1).toInt()) ? true : false;
-        break;
-      }
-      case incomingCMDs::debugSystem:
-      {
-        if(getSubString(portMessage, ':', 1).toInt())
-        {
-          systemStateFlags[debugState] = true;
-          systemStateFlags[runState] = false;
-        }
-        break;
-      }
-      case incomingCMDs::OutletValveControl:
-      {
-        valveOpen = (getSubString(portMessage, ':', 1).toInt()) ? Open : Closed;
-        break;
-      }
-      default:
-        Serial.println("Error occured: Command from UI/Computer not recognised...");
-        break;
-    }
+    
+    void SetSystemState(String portMessage);
   }
 }
-
+/**
+ * @brief This function is responsible for reading in the port message and setting the state of the system based on 
+ *        the information stored inside. 
+ * @param portMessage The state message that is received from the UART port
+*/
+void SetSystemState(String portMessage)
+{
+  int messageCMD = getSubString(portMessage, ':', 0).toInt();
+  switch (messageCMD)
+  {
+    case incomingCMDs::startSystem:
+    {
+      if(getSubString(portMessage, ':', 1).toInt())
+      {
+        systemStateFlags[runState] = true;
+        systemStateFlags[idleState] = false;
+        systemStateFlags[setupState] = false;
+        Serial.println("System in RUN state");
+      }
+      else
+      {
+        systemStateFlags[runState] = false;
+        systemStateFlags[idleState] = true;
+      }
+      break;
+    }
+    case incomingCMDs::stopSystem:
+    {
+      stopSys();
+      if(getSubString(portMessage, ':', 1).toInt()) // If the stop command is reliable from UI (double check)
+      {
+        systemStateFlags[runState] = false;
+        systemStateFlags[idleState] = true;
+        Serial.println("System in IDLE state");
+      }
+      break;
+    }
+    case incomingCMDs::setupSytem:
+    {
+      if(getSubString(portMessage, ':', 1).toInt()) // If the setup command and info is reliable from UI (double check)
+      {
+        systemStateFlags[runState] = false;
+        systemStateFlags[idleState] = true;
+        systemStateFlags[setupSytem] = true;
+        Serial.println("System in SETUP state");
+        setupExperimentalParameters(portMessage, ':');
+        setTemperatureRegulationFlags();  // Determine if temperature regulation is requested by the UI 
+      }
+      break;
+    }
+    case incomingCMDs::resetSystem:
+    {
+      resetMCU();  // Microcontroller will reset script
+      Serial.println("System reset failed..."); // This shouldn't execute, but iof it does the reset isn't working.
+      systemStateFlags[idleState] = true;
+      break;
+    }
+    case incomingCMDs::shareData:
+    {
+      systemStateFlags[shareState] = (getSubString(portMessage, ':', 1).toInt()) ? true : false;
+      break;
+    }
+    case incomingCMDs::viewData:
+    {
+      systemStateFlags[viewState] = (getSubString(portMessage, ':', 1).toInt()) ? true : false;
+      break;
+    }
+    case incomingCMDs::debugSystem:
+    {
+      if(getSubString(portMessage, ':', 1).toInt())
+      {
+        systemStateFlags[debugState] = true;
+        systemStateFlags[runState] = false;
+      }
+      break;
+    }
+    case incomingCMDs::OutletValveControl:
+    {
+      valveOpen = (getSubString(portMessage, ':', 1).toInt()) ? Open : Closed;
+      break;
+    }
+    default:
+      Serial.println("Error occured: Command from UI/Computer not recognised...");
+      break;
+  }
+}
 /*! Function description
   @brief  This function is used to set the system temperature regulation flags. These flags are used to check if temperature regulation for either 
           the geyser water, chamber air temp or inlet water temperature is required for the specific experiment. These system temp regulation flags 

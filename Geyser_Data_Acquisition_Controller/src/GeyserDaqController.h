@@ -272,6 +272,7 @@ void sendDataToSD(String dataString);
 void discoverOneWireDevices();
 void requestAllTemperatureConversions();
 void getGeyserTemperatures();
+void SetSystemState(String portMessage);
 void getGeyserTemperatureInstance();
 bool checkSensorCountOnBus(int busNumber, int sensorCountOnBus);
 void stopAllActuators();
