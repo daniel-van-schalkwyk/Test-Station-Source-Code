@@ -16,6 +16,7 @@
 #include <Adafruit_ADS1015.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <ZMPT101B.h>
 
 #define wifiPort                Serial2
 #define inletWaterComms         Serial1
@@ -109,14 +110,17 @@ volatile int flowRateControlCount = 0;
 volatile int systemAmbientUpdateCounter = 0;
 volatile unsigned long flowControlCounter = 0;
 double flowRateCorrectMargin = 0.0083333; // L/s
-const uint32_t currentSampleBufferSize = 125;
-volatile uint32_t currentACsignalBuffer[currentSampleBufferSize] = {};
-const int PowerSamplingFreq = 1250;
-volatile uint32_t currentSampleIndex = 0;
-volatile bool currentBufferSampledFlag = false;
+const uint32_t powerSampleBufferSize = 125;
+volatile uint32_t currentACsignalBuffer[powerSampleBufferSize] = {};
+volatile uint32_t voltageACsignalBuffer[powerSampleBufferSize] = {};
+const int powerSamplingFreq = 1250;
+volatile uint32_t powerSampleIndex = 0;
+volatile bool powerBufferSampledFlag = false;
 volatile uint32_t currentSqrtSampleSum = 0;
+volatile uint32_t voltageSqrtSampleSum = 0;
 volatile uint32_t currentVrefSum = 0;
 double primaryCurrent = 0.00;
+double primaryVoltage = 0.00;
 
 /** Define all flags **/
 bool systemStateFlags[systemStateIndex::systemStateCount] = {true, false, false, false, true, false, false, false, false};  // System state array to control state of system
@@ -155,6 +159,9 @@ RTCDue dueRTC(XTAL);
 //Define external ADC instance (ADS1115)
 Adafruit_ADS1115 externADC(0x48);
 
+// ZMPT101B sensor connected to A0 pin of arduino
+ZMPT101B voltageSensor(voltageReadPin);
+
 struct polynomialCalParams
 {
   double C0;
@@ -170,6 +177,7 @@ struct PID_params
   double e_sum;
   double e_prev;
 } PIDout;
+
 // Declare state machine states and flags
 bool valveOpen = false;
 bool ambientReady = false;
@@ -304,9 +312,10 @@ void actuateHeatingFans(bool heatingElementState, bool fanState);
 void actuateVentingFans(bool fanState);
 void actuateAmbientFans(bool fanState);
 double calculatePrimaryVoltage(float voltageReading, polynomialCalParams calParams);
-void capture_AC_current();
-double capture_AC_voltage();
-double calculate_AC_power(double voltage, double current, bool kWHUnits = false, double pf = 1.00);
+double getLoadCurrent();
+double getLoadVoltage();
+void capturePower();
+double calculateLoadPower(double voltage, double current, bool kWHUnits = false, double pf = 1.00);
 double captureWaterConsumption();
 double mapDouble(double x, double in_min, double in_max, double out_min, double out_max);
 String createChamberDataString();
@@ -337,4 +346,6 @@ void startPowerSamplingTimer(Tc *tc, uint32_t channel, IRQn_Type irq, uint32_t f
 void updateDisplay();
 int calcPIDoutput(double flowRateError);
 void readGetSetCommand(String getCommand);
+void ConfigureVoltageSensor();
+
 #endif

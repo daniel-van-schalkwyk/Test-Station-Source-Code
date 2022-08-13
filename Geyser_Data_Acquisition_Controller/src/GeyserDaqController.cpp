@@ -126,7 +126,7 @@ void timerSetup()
   // counter is not connected to any of the due pins.
   startDataSampleTimer(TC1, 1, TC4_IRQn, dataSamplingTime);  // Interrupt timer will execute every 5 seconds (0.2 Hz)
   startSystemUpdateTimer(TC1, 0, TC3_IRQn, systemUpdateTime); // Interrupt timer will execute every 1 seconds (1 Hz)
-  startPowerSamplingTimer(TC1, 2, TC5_IRQn, PowerSamplingFreq); // Interrupt timer will execute at 1.25 kHz
+  startPowerSamplingTimer(TC1, 2, TC5_IRQn, powerSamplingFreq); // Interrupt timer will execute at 1.25 kHz
   // TODO: Need to documnet properly why these timers are used! Look at One Note docs
 }
 
@@ -549,10 +549,10 @@ void readIncomingSerialMessage(int serialPort)
   }
   else
   {
-    
     void SetSystemState(String portMessage);
   }
 }
+
 /**
  * @brief This function is responsible for reading in the port message and setting the state of the system based on 
  *        the information stored inside. 
@@ -639,7 +639,8 @@ void SetSystemState(String portMessage)
       break;
   }
 }
-/*! Function description
+
+/**
   @brief  This function is used to set the system temperature regulation flags. These flags are used to check if temperature regulation for either 
           the geyser water, chamber air temp or inlet water temperature is required for the specific experiment. These system temp regulation flags 
           are set inside the "setupExperimentalParameters" function where it receives the command from the serial port. They are then checked in the 
@@ -655,7 +656,7 @@ void setTemperatureRegulationFlags()
   autoControlFlags[autoControlIndex::flowRateControlIndex] = (systemSetParams[setParamsIndex::waterFlowRateSet] != 0) ? true : false;
 }
 
-/*! Function description
+/**
   @brief  This function is used to respond to API commands from a computer. Thes commands are get and set commands. 
           The get commands are for sensor measurements.
           The set commands are used to configure parameters and control system actuators;
@@ -994,7 +995,7 @@ String createFinalDataString()
   return finalDataString;
 }
 
-/*! Function description
+/**
   @brief  This function is responsible for ensuring that the environment of the EWH unit 
           remains at the desireable parameters and that the geyser schedule is followed.
           Different climatic chamber functions
@@ -1020,7 +1021,7 @@ void controlEnvironment()
   if(autoControlFlags[autoControlIndex::geyserTempRegIndex])  controlGeyserElement();
   if(autoControlFlags[autoControlIndex::inletTempRegIndex])  controlGeyserInletTemp();
   controlWaterFlow();
-  capture_AC_current();
+  capturePower();
 }
 
 /*! Function description
@@ -1048,7 +1049,7 @@ void updateSystemParameters()
     systemUpdateFlag = false; // reset the timer flag
     captureTemperatureData(false);  // Retrieves all temperature data except the inside boiler data
     // Save accumulated information during a time step for data sample event
-    AccumulatedEnergyPerDataSample += calculate_AC_power(capture_AC_voltage(), primaryCurrent, true);
+    AccumulatedEnergyPerDataSample += calculateLoadPower(primaryVoltage, primaryCurrent, true);
     AccumulatedWaterConsumedPerDataSample += captureWaterConsumption();   // Capture current water consumption levels and accumulated consuption per data sampling period
   }
 }
@@ -1141,22 +1142,34 @@ void captureTemperatureData(bool captureBoilerData)
   ambError = systemSetParams[chamberSetTemp] - ambientTemp;
 }
 
+
+void capturePower()
+{
+  if(powerBufferSampledFlag)
+    {
+      powerBufferSampledFlag = false;
+      getLoadCurrent();
+      getLoadVoltage();
+    }
+}
+
+
 /** Function Ddscription
  * \brief This function is used to sample the current consumption of the geyser heating element at an instance of time. 
  * \return currentConsumption(double) - The current consumption of the geyser heating element
  */
-void capture_AC_current()  
+double getLoadCurrent()  
 {
   // This function is used to measure the AC current that is consumed by the geyser
   // A current transducer circuit is necessary for the function to read the accurate 
   // analog voltage. This voltage should be tested before connected to the Arduino
   // to ensure that the voltage levels do not exceed 3.3V (Arduino Due) or 5V (Arduino Mega)
-  if(currentBufferSampledFlag)
+  if(powerBufferSampledFlag)
   {
-    currentBufferSampledFlag = false; 
-    double currentMean = (double)currentSqrtSampleSum/(double)currentSampleBufferSize; 
+    powerBufferSampledFlag = false; 
+    double currentMean = (double)currentSqrtSampleSum/(double)powerSampleBufferSize; 
     currentSqrtSampleSum = 0;
-    double currentVrefMean = (double)currentVrefSum/(double)currentSampleBufferSize;
+    double currentVrefMean = (double)currentVrefSum/(double)powerSampleBufferSize;
     currentVrefSum = 0;
     double rmsCurrentMean = sqrt(currentMean);
     double primaryCurrentVoltage = mapDouble(rmsCurrentMean, 0, max12BitNum, 0, 3.30);
@@ -1164,6 +1177,8 @@ void capture_AC_current()
   }
   // Cap the current to zero if the output value is unrealistic
   if (primaryCurrent <= 0.1)  {primaryCurrent = 0;}
+
+  return primaryCurrent;
 }
 
 /** Function Ddscription
@@ -1171,7 +1186,7 @@ void capture_AC_current()
  *        It will most probably be close to 230V (RMS)
  * \return geyserVoltage(double) - The operating voltage of the geyser heating element.
  */
-double capture_AC_voltage() 
+double getLoadVoltage() 
 {
   // This function is used to measure the AC voltage of the Eskom power supply
   // that is used to supply the geyser with power
@@ -1179,10 +1194,22 @@ double capture_AC_voltage()
   double primaryVoltage;
   if(internalADCflag)
   {
-    double voltageReading = mapDouble((double)analogRead(voltageReadPin), 0.00, max12BitNum, 0.00, 3.30);
-    // Cap the voltage to zero if the output value is unrealistic
-    primaryVoltage = calculatePrimaryVoltage(voltageReading, voltageCalParams);
-    if (voltageReading <= 0.1)  { primaryVoltage = 0; }
+    // double voltageReading = mapDouble((double)analogRead(voltageReadPin), 0.00, max12BitNum, 0.00, 3.30);
+    // // Cap the voltage to zero if the output value is unrealistic
+    // primaryVoltage = calculatePrimaryVoltage(voltageReading, voltageCalParams);
+    // if (voltageReading <= 0.1)  { primaryVoltage = 0; }
+
+    if(powerBufferSampledFlag)
+    {
+      powerBufferSampledFlag = false; 
+      double voltageMean = (double)voltageSqrtSampleSum/(double)powerSampleBufferSize; 
+      currentSqrtSampleSum = 0;
+      double rmsVoltageMean = sqrt(voltageMean);
+      double primaryVoltage = mapDouble(rmsVoltageMean, 0, max12BitNum, 0, 3.30);
+      primaryVoltage = primaryVoltage * 380;
+    }
+    // Cap the current to zero if the output value is unrealistic
+    if (primaryCurrent <= 0.1)  {primaryCurrent = 0;}
   }
   else
   {
@@ -1190,7 +1217,7 @@ double capture_AC_voltage()
     primaryVoltage = calculatePrimaryVoltage(voltageReading, voltageCalParams);
     if (voltageReading <= 0.1)  { primaryVoltage = 0; }
   }
-  return 240.0; // Temporary
+  return 240.0; // TODO: Temporary - Needs to be replaced by implementation
 }
 
 double calculatePrimaryVoltage(float voltageReading, polynomialCalParams calParams)
@@ -2039,10 +2066,31 @@ void TC5_Handler()
 {
   // You must do TC_GetStatus to "accept" interrupt
   TC_GetStatus(TC1, 2);
-  currentACsignalBuffer[currentSampleIndex] = analogRead(currentReadPin) - analogRead(currentVref);
-  // currentACsignalBuffer[currentSampleIndex] = analogRead(currentReadPin);
-  currentSqrtSampleSum += sq(currentACsignalBuffer[currentSampleIndex]);
-  currentVrefSum += analogRead(currentVref);
-  currentSampleIndex++; 
-  if(currentSampleIndex == currentSampleBufferSize) { currentSampleIndex = 0; currentBufferSampledFlag = true;}
+
+  // Analog read on all power reading pins
+  uint32_t currentVrefTemp = analogRead(currentVref);
+  currentACsignalBuffer[powerSampleIndex] = analogRead(currentReadPin) - currentVrefTemp;
+  voltageACsignalBuffer[powerSampleIndex] = analogRead(voltageReadPin); 
+
+  // Calculate square roots of signals
+  currentVrefSum += currentVrefTemp;
+  currentSqrtSampleSum += sq(currentACsignalBuffer[powerSampleIndex]);
+  voltageSqrtSampleSum += sq(currentACsignalBuffer[powerSampleIndex]);
+  powerSampleIndex++; 
+  if(powerSampleIndex >= powerSampleBufferSize) 
+  { 
+    powerSampleIndex = 0; 
+    powerBufferSampledFlag = true;
+  }
+}
+
+/**
+ * 
+ * 
+ * 
+ * 
+ */
+void ConfigureVoltageSensor()
+{
+  // TODO: See if this is a viable solution 
 }
