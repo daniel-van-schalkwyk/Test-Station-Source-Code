@@ -93,6 +93,7 @@ void loop()
     {
       sampleDataFlag = false;
       String dataString = sampleData();
+      Serial.println("Data sampled");
       if(sdCardSuccessFlag) sendDataToSD(dataString);
       if(systemStateFlags[systemStateIndex::shareState])  sendDataToComputer(dataString);
       if(systemStateFlags[systemStateIndex::mqttShare])   sendDataToCloud();
@@ -549,7 +550,7 @@ void readIncomingSerialMessage(int serialPort)
   }
   else
   {
-    void SetSystemState(String portMessage);
+    SetSystemState(portMessage);
   }
 }
 
@@ -561,6 +562,7 @@ void readIncomingSerialMessage(int serialPort)
 void SetSystemState(String portMessage)
 {
   int messageCMD = getSubString(portMessage, ':', 0).toInt();
+  Serial.println(messageCMD);
   switch (messageCMD)
   {
     case incomingCMDs::startSystem:
@@ -1164,8 +1166,6 @@ double getLoadCurrent()
   // A current transducer circuit is necessary for the function to read the accurate 
   // analog voltage. This voltage should be tested before connected to the Arduino
   // to ensure that the voltage levels do not exceed 3.3V (Arduino Due) or 5V (Arduino Mega)
-  if(powerBufferSampledFlag)
-  {
     powerBufferSampledFlag = false; 
     double currentMean = (double)currentSqrtSampleSum/(double)powerSampleBufferSize; 
     currentSqrtSampleSum = 0;
@@ -1174,7 +1174,6 @@ double getLoadCurrent()
     double rmsCurrentMean = sqrt(currentMean);
     double primaryCurrentVoltage = mapDouble(rmsCurrentMean, 0, max12BitNum, 0, 3.30);
     primaryCurrent = (primaryCurrentVoltage)/(0.625) * currentSensorRated;
-  }
   // Cap the current to zero if the output value is unrealistic
   if (primaryCurrent <= 0.1)  {primaryCurrent = 0;}
 
@@ -1198,16 +1197,13 @@ double getLoadVoltage()
     // // Cap the voltage to zero if the output value is unrealistic
     // primaryVoltage = calculatePrimaryVoltage(voltageReading, voltageCalParams);
     // if (voltageReading <= 0.1)  { primaryVoltage = 0; }
-
-    if(powerBufferSampledFlag)
-    {
       powerBufferSampledFlag = false; 
       double voltageMean = (double)voltageSqrtSampleSum/(double)powerSampleBufferSize; 
       currentSqrtSampleSum = 0;
       double rmsVoltageMean = sqrt(voltageMean);
       double primaryVoltage = mapDouble(rmsVoltageMean, 0, max12BitNum, 0, 3.30);
       primaryVoltage = primaryVoltage * 380;
-    }
+      Serial.println("Primary Voltage = " + String(primaryVoltage, 2) + "V");
     // Cap the current to zero if the output value is unrealistic
     if (primaryCurrent <= 0.1)  {primaryCurrent = 0;}
   }
@@ -1234,7 +1230,7 @@ double calculatePrimaryVoltage(float voltageReading, polynomialCalParams calPara
  * \param pf  The power factor of the device (approximated) 
  * \return currentConsumption(double) - The current consumption of the geyser heating element
  */
-double calculate_AC_power(double voltage, double current, bool kWhUnits, double pf) 
+double calculateLoadPower(double voltage, double current, bool kWhUnits, double pf) 
 { 
   powerConsumed = voltage*current*pf;
   if (geyserLatchFlag == false) { powerConsumed = 0.00; }
