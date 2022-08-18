@@ -119,6 +119,7 @@ volatile bool powerBufferSampledFlag = false;
 volatile uint32_t currentSqrtSampleSum = 0;
 volatile uint32_t voltageSqrtSampleSum = 0;
 volatile uint32_t currentVrefSum = 0;
+volatile double voltageSensorBias = 2.5; // Bias voltage for voltage sensor reading
 double primaryCurrent = 0.00;
 double primaryVoltage = 0.00;
 
@@ -132,7 +133,7 @@ bool sdCardSuccessFlag = false;
 bool newFileFlag = true;
 bool autoFlowControlFlag = false;
 bool dataReadyFlag = false;
-bool internalADCflag = false;
+bool internalADCflag = true;
 bool firstRequestChamberTemp = true;
 bool firstRequestBoilerTemp = true;
 bool chamberHeatCheckFlag = false;
@@ -212,8 +213,8 @@ int outletValvePosTime = 0;
 // Set default DAQ parameters
 int dataSamplingTime = 5;  // in seconds
 const unsigned long systemUpdateTime = 1; // in seconds
-double T_upper = 0.2;     // Define default valaue for upper temperature margin
-double T_lower = 0.2;     // Define default valaue for lower temperature margin
+double T_upper = 0.5;     // Define default valaue for upper temperature margin
+double T_lower = 0.5;     // Define default valaue for lower temperature margin
 double prevAmbientTemp = 20;    // Defines a place holder for previous sample to determine rate of temperature decay
 double geyserSetTemp = 50.00;
 const double kelvinToC_const = 273.15;

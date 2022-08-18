@@ -208,7 +208,7 @@ namespace Geyser_DAQ_Control_User_Interface
             {
                 DateTime dt = DateTime.Now;
                 fileName = String.Format("{0}_{1}_{2}T{3}_{4}_{5}_Data.csv", dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
-                path = @"C:\Users\DanielvanSchalkwyk\OneDrive - Stellenbosch University\Master's Thesis\Data\" + fileName;
+                path = @"C:\Users\pdvs1\OneDrive - Stellenbosch University\Master's Thesis\Data\" + fileName;
                 using (var w = new System.IO.StreamWriter(path, true))
                 {
                     w.WriteLine(dataFileHeaders + "," + generateBoilerColumnHeaders());

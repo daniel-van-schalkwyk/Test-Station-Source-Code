@@ -93,7 +93,6 @@ void loop()
     {
       sampleDataFlag = false;
       String dataString = sampleData();
-      Serial.println("Data sampled");
       if(sdCardSuccessFlag) sendDataToSD(dataString);
       if(systemStateFlags[systemStateIndex::shareState])  sendDataToComputer(dataString);
       if(systemStateFlags[systemStateIndex::mqttShare])   sendDataToCloud();
@@ -562,7 +561,6 @@ void readIncomingSerialMessage(int serialPort)
 void SetSystemState(String portMessage)
 {
   int messageCMD = getSubString(portMessage, ':', 0).toInt();
-  Serial.println(messageCMD);
   switch (messageCMD)
   {
     case incomingCMDs::startSystem:
@@ -1144,14 +1142,13 @@ void captureTemperatureData(bool captureBoilerData)
   ambError = systemSetParams[chamberSetTemp] - ambientTemp;
 }
 
-
 void capturePower()
 {
   if(powerBufferSampledFlag)
     {
-      powerBufferSampledFlag = false;
       getLoadCurrent();
       getLoadVoltage();
+      powerBufferSampledFlag = false;
     }
 }
 
@@ -1166,7 +1163,6 @@ double getLoadCurrent()
   // A current transducer circuit is necessary for the function to read the accurate 
   // analog voltage. This voltage should be tested before connected to the Arduino
   // to ensure that the voltage levels do not exceed 3.3V (Arduino Due) or 5V (Arduino Mega)
-    powerBufferSampledFlag = false; 
     double currentMean = (double)currentSqrtSampleSum/(double)powerSampleBufferSize; 
     currentSqrtSampleSum = 0;
     double currentVrefMean = (double)currentVrefSum/(double)powerSampleBufferSize;
@@ -1187,33 +1183,32 @@ double getLoadCurrent()
  */
 double getLoadVoltage() 
 {
-  // This function is used to measure the AC voltage of the Eskom power supply
-  // that is used to supply the geyser with power
   analogReadResolution(12);
   double primaryVoltage;
   if(internalADCflag)
   {
-    // double voltageReading = mapDouble((double)analogRead(voltageReadPin), 0.00, max12BitNum, 0.00, 3.30);
-    // // Cap the voltage to zero if the output value is unrealistic
-    // primaryVoltage = calculatePrimaryVoltage(voltageReading, voltageCalParams);
-    // if (voltageReading <= 0.1)  { primaryVoltage = 0; }
-      powerBufferSampledFlag = false; 
-      double voltageMean = (double)voltageSqrtSampleSum/(double)powerSampleBufferSize; 
-      currentSqrtSampleSum = 0;
-      double rmsVoltageMean = sqrt(voltageMean);
-      double primaryVoltage = mapDouble(rmsVoltageMean, 0, max12BitNum, 0, 3.30);
-      primaryVoltage = primaryVoltage * 380;
-      Serial.println("Primary Voltage = " + String(primaryVoltage, 2) + "V");
+    double voltageMean = (double)voltageSqrtSampleSum/(double)powerSampleBufferSize; 
+    voltageSqrtSampleSum = 0;
+    double rmsVoltageMean = sqrt(voltageMean);
+    // Serial.println("ADC RMS Value: " + String(rmsVoltageMean, 2) + "\n");
+    double primaryVoltage = mapDouble(rmsVoltageMean, 0, max12BitNum, 0, 3.30);
+    // Serial.println("ADC RMS Voltage: " + String(primaryVoltage, 2) + "V_rms\n");
+    primaryVoltage = primaryVoltage * 380;
+    // Serial.println("Primary Voltage: " + String(primaryVoltage, 2) + "V_rms\n");
     // Cap the current to zero if the output value is unrealistic
-    if (primaryCurrent <= 0.1)  {primaryCurrent = 0;}
+    if (primaryVoltage <= 5)  {primaryVoltage = 0;}
+    if (primaryVoltage > 250) {primaryVoltage = 230;}
   }
   else
   {
     double voltageReading = mapDouble((double)externADC.readADC_SingleEnded(externADCPins::voltagePin), 0.00, pow(2, 15)-1, 0.00, 3.30);
     primaryVoltage = calculatePrimaryVoltage(voltageReading, voltageCalParams);
-    if (voltageReading <= 0.1)  { primaryVoltage = 0; }
+    if (voltageReading <= 0.1)  
+    { 
+      primaryVoltage = 0; 
+    }
   }
-  return 240.0; // TODO: Temporary - Needs to be replaced by implementation
+  return 225.00; // TODO: Temporary - Needs to be replaced by implementation
 }
 
 double calculatePrimaryVoltage(float voltageReading, polynomialCalParams calParams)
@@ -1289,7 +1284,7 @@ String createChamberDataString()
 */
 void controlAmbTemp() 
 { 
-  if(systemAmbientUpdateCounter >= 2)
+  if(systemAmbientUpdateCounter >= 3)
   {
     systemAmbientUpdateCounter = false;
     double outsideTemp = climaticChamberTempArray[outsideTempAddress];
@@ -1330,7 +1325,8 @@ void controlAmbTemp()
       {
         //Serial.println("Cooling loop activated");
         ambientReady = true;
-        actuateHeatingFans(Off, On);  // Fans for element remain on to cool off element to prevent damage
+        actuateHeatingFans(Off, On); // Fans for element remain on to cool off element to prevent damage
+
         if(ambientTemp - ambSetTemp >= 0.30)
         {
           actuateVentingFans(On);
@@ -1346,7 +1342,6 @@ void controlAmbTemp()
       {
         ambientReady = false;   // ambient is not ready for testing
         actuateHeatingFans(On, On);   // Both heating fans start heating up the chamber
-        Serial.println("Heaters actuated"); // temp debugging tool
         actuateVentingFans(Off);     // Turn off the venting fans
       }
       double tempDiff = amb1Temp-amb2Temp;
@@ -1359,7 +1354,6 @@ void controlAmbTemp()
         actuateAmbientFans(On);  // Turn on the ambient fans 
     }
   }
-  
 }
 
 void getTempMargins() 
@@ -1634,7 +1628,7 @@ void actuateHeatingFans(bool heatingElementState, bool fanState)
     chamberStateFlags[chamberStateIndex::heatingFanElement] = On;
     digitalWrite(ambHeatingElem_set, On);
     digitalWrite(ambHeatingElem_reset, Off);
-    delay(5);
+    delay(30);
     digitalWrite(ambHeatingElem_set, Off);
     ambHeatingFlag = true;
   }
@@ -1644,7 +1638,7 @@ void actuateHeatingFans(bool heatingElementState, bool fanState)
     chamberStateFlags[chamberStateIndex::heatingFanElement] = Off;
     digitalWrite(ambHeatingElem_set, Off);
     digitalWrite(ambHeatingElem_reset, On);
-    delay(5);
+    delay(30);
     digitalWrite(ambHeatingElem_reset, Off);
     ambHeatingFlag = false;
   }
@@ -2053,7 +2047,6 @@ void TC4_Handler()
   // You must do TC_GetStatus to "accept" interrupt
   // As parameters use the first two parameters used in startTimer (TC1, 1 in this case)
   TC_GetStatus(TC1, 1);
-  // Serial.println(String(millis()) + " : Second Timer works");
   sampleDataFlag = true;
 }
 
@@ -2063,21 +2056,26 @@ void TC5_Handler()
   // You must do TC_GetStatus to "accept" interrupt
   TC_GetStatus(TC1, 2);
 
-  // Analog read on all power reading pins
-  uint32_t currentVrefTemp = analogRead(currentVref);
-  currentACsignalBuffer[powerSampleIndex] = analogRead(currentReadPin) - currentVrefTemp;
-  voltageACsignalBuffer[powerSampleIndex] = analogRead(voltageReadPin); 
+  if(powerBufferSampledFlag == false)
+  {
+    // Analog read on all power reading pins
+    uint32_t currentVrefTemp = analogRead(currentVref);
+    currentACsignalBuffer[powerSampleIndex] = analogRead(currentReadPin) - currentVrefTemp;
+    voltageACsignalBuffer[powerSampleIndex] = analogRead(voltageReadPin) - (uint32_t)(voltageSensorBias/3.3 * max12BitNum); 
 
-  // Calculate square roots of signals
-  currentVrefSum += currentVrefTemp;
-  currentSqrtSampleSum += sq(currentACsignalBuffer[powerSampleIndex]);
-  voltageSqrtSampleSum += sq(currentACsignalBuffer[powerSampleIndex]);
-  powerSampleIndex++; 
-  if(powerSampleIndex >= powerSampleBufferSize) 
-  { 
-    powerSampleIndex = 0; 
-    powerBufferSampledFlag = true;
+    // Calculate square roots of signals
+    currentVrefSum += currentVrefTemp;
+    currentSqrtSampleSum += sq(currentACsignalBuffer[powerSampleIndex]);
+    voltageSqrtSampleSum += sq(voltageACsignalBuffer[powerSampleIndex]);
+    powerSampleIndex++; 
+    if(powerSampleIndex >= powerSampleBufferSize) 
+    { 
+      powerSampleIndex = 0; 
+      powerBufferSampledFlag = true;
+    }
   }
+  
+  
 }
 
 /**
