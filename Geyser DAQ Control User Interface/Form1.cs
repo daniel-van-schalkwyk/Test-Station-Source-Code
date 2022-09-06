@@ -55,24 +55,25 @@ namespace Geyser_DAQ_Control_User_Interface
             serialReceiveTextBox.AppendText(myString);
             if (myString.StartsWith("2")) 
             { 
-                dataArray = myString.Split(',');
-                geyserWaterTempTextBox.Text = (dataArray[20].StartsWith("-1")) ? ("Not Connected") : dataArray[20] + " °C";
-                inletWaterTempTextBox.Text = (dataArray[21].StartsWith("-127")) ? ("Not Connected") : dataArray[21] + " °C";
-                outletWaterTempTextBox.Text = (dataArray[22].StartsWith("-127")) ? ("Not Connected") : dataArray[22] + " °C";
-                ChamberTempTextBox.Text = (dataArray[28].StartsWith("-")) ? ("Not Connected") : dataArray[28] + " °C";
-                waterFlowRateTextBox.Text = dataArray[18] + " mL/Ts";
-                energyUsedTextBox.Text = dataArray[17] + " Wh/Ts";
                 try
                 {
+                    dataArray = myString.Split(',');
+                    geyserWaterTempTextBox.Text = (dataArray[20].StartsWith("-1")) ? ("Not Connected") : dataArray[20] + " °C";
+                    inletWaterTempTextBox.Text = (dataArray[21].StartsWith("-127")) ? ("Not Connected") : dataArray[21] + " °C";
+                    outletWaterTempTextBox.Text = (dataArray[22].StartsWith("-127")) ? ("Not Connected") : dataArray[22] + " °C";
+                    ChamberTempTextBox.Text = (dataArray[28].StartsWith("-")) ? ("Not Connected") : dataArray[28] + " °C";
+                    waterFlowRateTextBox.Text = dataArray[18] + " mL/Ts";
+                    energyUsedTextBox.Text = dataArray[17] + " Wh/Ts";
                     ActualElementStateTextBox.Text = (double.Parse(dataArray[17]) > 1) ? ("On") : ("Off");
+                    geyserElementStateTextBox.Text = (dataArray[16].StartsWith("1")) ? ("On") : ("Off");
+                    labTemperatureTextBox.Text = (dataArray[25].StartsWith("-")) ? ("Not Connected") : dataArray[25] + " °C";
+                    ExperimentDurTextBox.Text = "";
                 }
                 catch
                 {
 
                 }
-                geyserElementStateTextBox.Text = (dataArray[16].StartsWith("1")) ? ("On") : ("Off");
-                labTemperatureTextBox.Text = (dataArray[25].StartsWith("-")) ? ("Not Connected") : dataArray[25] + " °C";
-                ExperimentDurTextBox.Text = "";
+                
             }
 
         }

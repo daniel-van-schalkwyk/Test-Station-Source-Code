@@ -19,19 +19,19 @@ void setup() {
 void loop() {
   // Loop code
 
-  double angleCurr = getServoAngle();
-  Serial.println(String(angleCurr) + " : " + String(ServoPwmTick));
-  calibrateServos();
+  // double angleCurr = getServoAngle();
+  // Serial.println(String(angleCurr) + " : " + String(ServoPwmTick));
+  // calibrateServos();
   if(mainControllerChannel.available() > 0) // If there is a message from the main controller
   {
     String message = mainControllerChannel.readStringUntil('\n');
-    readSerialMessage(message);
+    // readSerialMessage(message);
     // mainControllerChannel.println("You sent: " + message);
   }
   else if(Serial.available() > 0) // If there is a message from the computer via USB
   {
     // Do something here
-    readSerialMessage(Serial.readStringUntil('\n'));
+    // readSerialMessage(Serial.readStringUntil('\n'));
     // Serial.println("Message received from Computer");
     // Serial.flush();
   }
@@ -272,6 +272,11 @@ void getAllTemperatures()
 */
 void controlGeyserElement(double geyserWaterTemp, double geyserSetTemp)  
 {
+  if(geyserWaterTemp < 0)
+  {
+    actuatePower(Off, highPowerLoad::geyser);
+    return;
+  }
   if(geyserTempUpdateCounter >= (5*20) && systemState == systemStates::heating)  // Update geyser element state every 5 seconds 
   {
     geyserTempUpdateCounter = 0;
@@ -337,12 +342,19 @@ void controlChestFreezerPower()
   if(systemState == systemStates::cooling && freezerTempUpdateCounter >= (5*20))
   {
     freezerTempUpdateCounter = 0;
-    if(freezerChamberTemp > 1.00) // Turn freezer on to decrease temperature in freezer chamber
+    if(freezerChamberTemp >= 3.00) // Turn freezer on to decrease temperature in freezer chamber
     {
+      Serial.println("Freezer on");
       actuatePower(On, highPowerLoad::freezer);
       actuatePower(Off, highPowerLoad::geyser);
     }
-    else if(systemState == systemStates::heating || systemState == systemStates::idle) // Turn freezer off before it reaches dangerously low temperature
+    else
+    {
+      Serial.println("Freezer off");
+      actuatePower(Off, highPowerLoad::freezer);
+    }
+    
+    if(systemState == systemStates::heating || systemState == systemStates::idle) // Turn freezer off before it reaches dangerously low temperature
     {
       actuatePower(Off, highPowerLoad::freezer);
     }
@@ -357,7 +369,7 @@ void controlInletEnvironment(double MainInletSetTemp)
   if(paramsRequestTick >= (150)) // Request parameter update from main controller every 30 sec
   {
     paramsRequestTick = 0;
-    requestInletControllerParams();
+    // requestInletControllerParams();
   }
   if(regulationFlag)
   {
@@ -366,7 +378,7 @@ void controlInletEnvironment(double MainInletSetTemp)
     // systemState = setSystemState();
     controlGeyserElement(geyserWaterTemp, geyserSetTemp); // Control geyser temp
     controlChestFreezerPower(); // Ensure that freezer temperature does not go lower than 1*C
-    controlServoValve();  // Control flow of water through servo valve
+    // controlServoValve();  // Control flow of water through servo valve
   }
   getAllTemperatures(); // Capture state temperatures
 }

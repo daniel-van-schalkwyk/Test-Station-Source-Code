@@ -17,6 +17,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <ZMPT101B.h>
+#include <ArduinoJson.h>
 
 #define wifiPort                Serial2
 #define inletWaterComms         Serial1
@@ -108,7 +109,7 @@ const int disconnectDS18B20 = -127;
 volatile uint8_t geyserTempDelayTick = 0;
 volatile int flowRateControlCount = 0;
 volatile int systemAmbientUpdateCounter = 0;
-volatile unsigned long flowControlCounter = 0;
+volatile unsigned long flowControlCounter = 0; 
 double flowRateCorrectMargin = 0.0083333; // L/s
 const uint32_t powerSampleBufferSize = 125;
 volatile uint32_t currentACsignalBuffer[powerSampleBufferSize] = {};
@@ -119,9 +120,13 @@ volatile bool powerBufferSampledFlag = false;
 volatile uint32_t currentSqrtSampleSum = 0;
 volatile uint32_t voltageSqrtSampleSum = 0;
 volatile uint32_t currentVrefSum = 0;
+volatile uint32_t voltagePeak = 0;
 volatile double voltageSensorBias = 2.5; // Bias voltage for voltage sensor reading
+long voltageSwingPoint = (long)(voltageSensorBias/3.3 * max12BitNum);
 double primaryCurrent = 0.00;
+double currentCorrectionFactor = 1.0255;
 double primaryVoltage = 0.00;
+int peakSampleCount = 0;
 
 /** Define all flags **/
 bool systemStateFlags[systemStateIndex::systemStateCount] = {true, false, false, false, true, false, false, false, false};  // System state array to control state of system
@@ -236,7 +241,7 @@ String dataColNamesChamber = "PowerConsumed,WaterConsumed, \
                               OutletWaterTemp,TopGeyserSurfaceTemp,BotGeyserSurfaceTemp,LabTemp,\
                               ChamberTemp1,ChamberTemp2,ChamberTempMean";
 String dataColNamesBoiler = "";
-double flowMeterResolution = 2.425; // in mL
+double flowMeterResolution = 2.63; // in mL was 2.425
 
 struct dueTimeAndDate
 {
@@ -296,6 +301,9 @@ void sendDiagnosticsToComputer();
 void controlEnvironment();
 void updateSystemParameters();
 String sampleData();
+int GetMaxValFromArray(uint32_t Array[], int size, int chunkSize);
+int GetAvgValFromArray(uint32_t Array[], int size);
+void AddDataToJsonDataset();
 void testLatchingRelays(bool which);
 bool isDataSampleEvent();
 void i2cScanner();

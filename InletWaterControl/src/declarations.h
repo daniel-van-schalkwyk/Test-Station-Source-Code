@@ -56,11 +56,11 @@ const DeviceAddress mainInletWaterSensorAddress = {0x28, 0xA7, 0xB3, 0x79, 0xA2,
 const DeviceAddress localOutletSensorAddress = {0x28, 0xE9, 0x12, 0x75, 0xD0, 0x01, 0x3C, 0xB7};
 const DeviceAddress freezerTempSensorAddress = {0x28, 0x98, 0xBD, 0x75, 0xD0, 0x01, 0x3C, 0x44};
 // Define all general variables
-int systemState = idle;
+int systemState = cooling;
 bool menuLatch = false;
 bool geyserLatchFlag = false;
 bool freezerLatchFlag = false;
-bool regulationFlag = false;
+bool regulationFlag = true;
 volatile int timerSampleCounter = 0;
 bool firstTempRequest = true;
 volatile bool encoderClkFlag = false;
@@ -82,7 +82,7 @@ const unsigned long serialSpeed = 115200;
 double inletTempMeas = 0.00;
 double inletTempCal = 0.00;
 double inletSetTemp = 20;
-double geyserSetTemp = 40;  // This may change a abit according to the required outlet target
+double geyserSetTemp = 55;  // This may change a abit according to the required outlet target
 // Define local temperature measurement variables
 double localOutletTemp = 0.00;
 double freezerChamberTemp = 0.00;
@@ -119,6 +119,7 @@ struct PID_params
   double e_sum;
   double e_prev;
 }servoPIDout;
+
 // Define variables for thermistor circuit and code
 struct paramsThermistorNTC
 {

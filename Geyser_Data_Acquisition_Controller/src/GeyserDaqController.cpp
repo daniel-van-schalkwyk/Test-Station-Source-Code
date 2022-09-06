@@ -87,13 +87,13 @@ void loop()
   }
   else if(systemStateFlags[runState])  // Continue with regular program sequence
   {
-    updateSystemParameters(); // Update system control parameters
     controlEnvironment(); // Control system based on updated system parameters
+    updateSystemParameters(); // Update system control parameters
     if(sampleDataFlag)
     {
       sampleDataFlag = false;
       String dataString = sampleData();
-      if(sdCardSuccessFlag) sendDataToSD(dataString);
+      // if(sdCardSuccessFlag) sendDataToSD(dataString);
       if(systemStateFlags[systemStateIndex::shareState])  sendDataToComputer(dataString);
       if(systemStateFlags[systemStateIndex::mqttShare])   sendDataToCloud();
     }
@@ -231,9 +231,7 @@ void setCurrentTime(dueTimeAndDate *requestedTime)
 */
 void sendDataToComputer(String dataString) 
 {
-  Serial.println("Sharing all data with computer:");
   Serial.println(dataString);
-  Serial.println("Done");
   Serial.flush();
 }
 
@@ -1049,6 +1047,15 @@ void updateSystemParameters()
     systemUpdateFlag = false; // reset the timer flag
     captureTemperatureData(false);  // Retrieves all temperature data except the inside boiler data
     // Save accumulated information during a time step for data sample event
+    // if(peakSampleCount != 0)
+    // {
+    //   primaryCurrent /= (double)peakSampleCount;
+    //   primaryVoltage /= (double)peakSampleCount;
+    // }
+    // Serial.println(primaryCurrent);
+    // peakSampleCount = 0;
+    // Serial.println(String(millis()) + " - Current = " + String(primaryCurrent) + " - Voltage = " + String(primaryVoltage));
+    // Serial.println(primaryVoltage);
     AccumulatedEnergyPerDataSample += calculateLoadPower(primaryVoltage, primaryCurrent, true);
     AccumulatedWaterConsumedPerDataSample += captureWaterConsumption();   // Capture current water consumption levels and accumulated consuption per data sampling period
   }
@@ -1093,7 +1100,6 @@ String sampleData()
 {
   String dataString = "";
   setCurrentTime(&dataSampleTime);
-  // Serial.println("Timestamp: " + createTimeStamp(&dataSampleTime));
   captureTemperatureData(true); // Capture all temperatures including the boiler data - populates a bunch of temperature arrays.
   // Populate the chamber data array for data sampling
   chamberDataArray[0] = AccumulatedEnergyPerDataSample;
@@ -1148,6 +1154,7 @@ void capturePower()
     {
       getLoadCurrent();
       getLoadVoltage();
+      peakSampleCount++;
       powerBufferSampledFlag = false;
     }
 }
@@ -1163,17 +1170,56 @@ double getLoadCurrent()
   // A current transducer circuit is necessary for the function to read the accurate 
   // analog voltage. This voltage should be tested before connected to the Arduino
   // to ensure that the voltage levels do not exceed 3.3V (Arduino Due) or 5V (Arduino Mega)
-    double currentMean = (double)currentSqrtSampleSum/(double)powerSampleBufferSize; 
-    currentSqrtSampleSum = 0;
-    double currentVrefMean = (double)currentVrefSum/(double)powerSampleBufferSize;
-    currentVrefSum = 0;
-    double rmsCurrentMean = sqrt(currentMean);
-    double primaryCurrentVoltage = mapDouble(rmsCurrentMean, 0, max12BitNum, 0, 3.30);
-    primaryCurrent = (primaryCurrentVoltage)/(0.625) * currentSensorRated;
+  int PeakAdcValue = GetMaxValFromArray((uint32_t*)currentACsignalBuffer, 125, 5);
+  // Clear the buffer
+  PeakAdcValue /= sqrt(2);
+  for(int i = 0; i < 125; i++)
+  {
+    voltageACsignalBuffer[i] = 0;
+  }
+  double primaryCurrentVoltage = mapDouble(PeakAdcValue, 0, max12BitNum, 0, 3.30);
+  primaryCurrent = (primaryCurrentVoltage)/(0.625) * currentSensorRated * currentCorrectionFactor;
+
   // Cap the current to zero if the output value is unrealistic
   if (primaryCurrent <= 0.1)  {primaryCurrent = 0;}
 
   return primaryCurrent;
+}
+
+/**
+ * 
+ * 
+ * 
+ */
+int GetMaxValFromArray(uint32_t Array[], int size, int chunkSize)
+{
+  uint32_t maxVal = Array[0];
+  uint32_t peakSum = 0; 
+  for(int j = 0; j < chunkSize; j++)
+  {
+    for(int i = 0; i < size/chunkSize; i++)
+    {
+      if(Array[i] > maxVal)
+        maxVal = Array[i];
+    }
+    peakSum += maxVal;
+  }
+  return peakSum/chunkSize;
+}
+
+/**
+ * 
+ * 
+ * 
+ */
+int GetAvgValFromArray(uint32_t Array[], int size)
+{
+  uint32_t elementSum = 0; 
+  for(int i = 0; i < size; i++)
+  {
+    elementSum += Array[i];
+  }
+  return elementSum/size;
 }
 
 /** Function Ddscription
@@ -1183,20 +1229,24 @@ double getLoadCurrent()
  */
 double getLoadVoltage() 
 {
-  analogReadResolution(12);
-  double primaryVoltage;
+  // analogReadResolution(12);
   if(internalADCflag)
   {
-    double voltageMean = (double)voltageSqrtSampleSum/(double)powerSampleBufferSize; 
-    voltageSqrtSampleSum = 0;
-    double rmsVoltageMean = sqrt(voltageMean);
-    // Serial.println("ADC RMS Value: " + String(rmsVoltageMean, 2) + "\n");
-    double primaryVoltage = mapDouble(rmsVoltageMean, 0, max12BitNum, 0, 3.30);
-    // Serial.println("ADC RMS Voltage: " + String(primaryVoltage, 2) + "V_rms\n");
-    primaryVoltage = primaryVoltage * 380;
-    // Serial.println("Primary Voltage: " + String(primaryVoltage, 2) + "V_rms\n");
+    // Get avg peak value
+    int swingPoint = GetAvgValFromArray((uint32_t*)voltageACsignalBuffer, 125);
+    int PeakAdcValue = GetMaxValFromArray((uint32_t*)voltageACsignalBuffer, 125, 5) - swingPoint;
+    // Clear the buffer
+    for(int i = 0; i < 125; i++)
+    {
+      voltageACsignalBuffer[i] = 0;
+    }
+    double rmsVoltageMean = (double)PeakAdcValue/sqrt(2.00);
+
+    double primaryVoltageSmall = mapDouble(rmsVoltageMean, 0, max12BitNum, 0, 3.30);
+    primaryVoltage = (primaryVoltageSmall * (double)380);
+
     // Cap the current to zero if the output value is unrealistic
-    if (primaryVoltage <= 5)  {primaryVoltage = 0;}
+    if (primaryVoltage <= 10)  {primaryVoltage = 0;}
     if (primaryVoltage > 250) {primaryVoltage = 230;}
   }
   else
@@ -1208,7 +1258,7 @@ double getLoadVoltage()
       primaryVoltage = 0; 
     }
   }
-  return 225.00; // TODO: Temporary - Needs to be replaced by implementation
+  return primaryVoltage;
 }
 
 double calculatePrimaryVoltage(float voltageReading, polynomialCalParams calParams)
@@ -2055,18 +2105,29 @@ void TC5_Handler()
 {
   // You must do TC_GetStatus to "accept" interrupt
   TC_GetStatus(TC1, 2);
-
   if(powerBufferSampledFlag == false)
   {
-    // Analog read on all power reading pins
+    // Analog read current
     uint32_t currentVrefTemp = analogRead(currentVref);
     currentACsignalBuffer[powerSampleIndex] = analogRead(currentReadPin) - currentVrefTemp;
-    voltageACsignalBuffer[powerSampleIndex] = analogRead(voltageReadPin) - (uint32_t)(voltageSensorBias/3.3 * max12BitNum); 
+    if(currentACsignalBuffer[powerSampleIndex] > max12BitNum)
+    {
+      currentACsignalBuffer[powerSampleIndex] = 0;
+    }
 
+    // Read voltage 
+    voltageACsignalBuffer[powerSampleIndex] = analogRead(voltageReadPin);
+    // voltageACsignalBuffer[powerSampleIndex] -= (uint32_t)voltageSwingPoint;
+    if(voltageACsignalBuffer[powerSampleIndex] > max12BitNum)
+    {
+      voltageACsignalBuffer[powerSampleIndex] = 0;
+    }
     // Calculate square roots of signals
     currentVrefSum += currentVrefTemp;
     currentSqrtSampleSum += sq(currentACsignalBuffer[powerSampleIndex]);
-    voltageSqrtSampleSum += sq(voltageACsignalBuffer[powerSampleIndex]);
+
+    // Append Sqrt voltage value
+    voltageSqrtSampleSum += voltageACsignalBuffer[powerSampleIndex];
     powerSampleIndex++; 
     if(powerSampleIndex >= powerSampleBufferSize) 
     { 
@@ -2074,8 +2135,6 @@ void TC5_Handler()
       powerBufferSampledFlag = true;
     }
   }
-  
-  
 }
 
 /**
@@ -2087,4 +2146,113 @@ void TC5_Handler()
 void ConfigureVoltageSensor()
 {
   // TODO: See if this is a viable solution 
+}
+
+void AddDataToJsonDataset()
+{
+    DynamicJsonDocument doc(4096);
+
+    // JsonObject MetaData = doc.createNestedObject("MetaData");
+    // MetaData["SamplingRate"] = 5;
+    // MetaData["OperatorName"] = "Daniel van Schalkwyk";
+    // MetaData["GeneralInfo"] = "Some text here";
+
+
+    JsonArray DataCollection = doc.createNestedArray("DataCollection");
+
+    JsonObject DataCollection_1 = DataCollection.createNestedObject();
+    DataCollection_1["TimeStamp"] = "2022-01-07T15:51:47";
+
+    JsonObject DataCollection_1_SetParameters = DataCollection_1.createNestedObject("SetParameters");
+    DataCollection_1_SetParameters["ChamberSetTemp"] = 0;
+    DataCollection_1_SetParameters["GeyserWaterSetTemp"] = 0;
+    DataCollection_1_SetParameters["InletWaterSetTemp"] = 0;
+    DataCollection_1_SetParameters["DesiredFlowRate"] = 0;
+
+    JsonObject DataCollection_1_RegulationFlags = DataCollection_1.createNestedObject("RegulationFlags");
+    DataCollection_1_RegulationFlags["ChamberAirTempReg"] = true;
+    DataCollection_1_RegulationFlags["GeyserWaterTempReg"] = false;
+    DataCollection_1_RegulationFlags["InletWaterTempReg"] = true;
+    DataCollection_1_RegulationFlags["FlowRateReg"] = true;
+    DataCollection_1_RegulationFlags["WaterScheduleControl"] = true;
+    DataCollection_1_RegulationFlags["PowerScheduleControl"] = false;
+
+    JsonObject DataCollection_1_TestBenchStates = DataCollection_1.createNestedObject("TestBenchStates");
+    DataCollection_1_TestBenchStates["ChamberHeatingFans"] = true;
+    DataCollection_1_TestBenchStates["ChamberVentingFans"] = false;
+    DataCollection_1_TestBenchStates["CirculationFans"] = true;
+    DataCollection_1_TestBenchStates["ChamberHeatingElement"] = true;
+    DataCollection_1_TestBenchStates["WaterValveState"] = false;
+    DataCollection_1_TestBenchStates["GeyserHeatingFlag"] = true;
+
+    JsonObject DataCollection_1_ExternalMeasurements = DataCollection_1.createNestedObject("ExternalMeasurements");
+    DataCollection_1_ExternalMeasurements["PowerConsumed"] = 0;
+    DataCollection_1_ExternalMeasurements["WaterConsumed"] = 0;
+    DataCollection_1_ExternalMeasurements["TotalWaterConsumed"] = 0;
+    DataCollection_1_ExternalMeasurements["GeyserWaterThermostatTemp"] = 0;
+    DataCollection_1_ExternalMeasurements["InletWaterTemp"] = 0;
+    DataCollection_1_ExternalMeasurements["OutletWaterTemp"] = 0;
+    DataCollection_1_ExternalMeasurements["TopGeyserSurfaceTemp"] = 0;
+    DataCollection_1_ExternalMeasurements["BotGeyserSurfaceTemp"] = 0;
+    DataCollection_1_ExternalMeasurements["LabTemp"] = 0;
+    DataCollection_1_ExternalMeasurements["MeanChamberTemp"] = 0;
+
+    JsonObject DataCollection_1_InternalTankTemperatures = DataCollection_1.createNestedObject("InternalTankTemperatures");
+
+    JsonArray DataCollection_1_InternalTankTemperatures_Bus0 = DataCollection_1_InternalTankTemperatures.createNestedArray("Bus0");
+    for (size_t i = 0; i < 9; i++)
+    {
+        DataCollection_1_InternalTankTemperatures_Bus0.add(0);
+    }
+
+    JsonArray DataCollection_1_InternalTankTemperatures_Bus1 = DataCollection_1_InternalTankTemperatures.createNestedArray("Bus1");
+    for (size_t i = 0; i < 9; i++)
+    {
+        DataCollection_1_InternalTankTemperatures_Bus1.add(0);
+    }
+
+    JsonArray DataCollection_1_InternalTankTemperatures_Bus2 = DataCollection_1_InternalTankTemperatures.createNestedArray("Bus2");
+    for (size_t i = 0; i < 9; i++)
+    {
+        DataCollection_1_InternalTankTemperatures_Bus2.add(0);
+    }
+
+    JsonArray DataCollection_1_InternalTankTemperatures_Bus3 = DataCollection_1_InternalTankTemperatures.createNestedArray("Bus3");
+    for (size_t i = 0; i < 9; i++)
+    {
+        DataCollection_1_InternalTankTemperatures_Bus3.add(0);
+    }
+
+    JsonArray DataCollection_1_InternalTankTemperatures_Bus4 = DataCollection_1_InternalTankTemperatures.createNestedArray("Bus4");
+    for (size_t i = 0; i < 9; i++)
+    {
+        if( i != 3 || i != 4 || i != 5 )    // Exclude the inbetween sensors that don't exist
+            DataCollection_1_InternalTankTemperatures_Bus4.add(0);
+    }
+
+    JsonArray DataCollection_1_InternalTankTemperatures_Bus5 = DataCollection_1_InternalTankTemperatures.createNestedArray("Bus5");
+    for (size_t i = 0; i < 8; i++)
+    {
+        DataCollection_1_InternalTankTemperatures_Bus5.add(0);
+    }
+
+    JsonArray DataCollection_1_InternalTankTemperatures_Bus6 = DataCollection_1_InternalTankTemperatures.createNestedArray("Bus6");
+    for (size_t i = 0; i < 8; i++)
+    {
+        DataCollection_1_InternalTankTemperatures_Bus6.add(0);
+    }
+
+    JsonArray DataCollection_1_InternalTankTemperatures_Bus7 = DataCollection_1_InternalTankTemperatures.createNestedArray("Bus7");
+    for (size_t i = 0; i < 8; i++)
+    {
+        DataCollection_1_InternalTankTemperatures_Bus7.add(0);
+    }
+
+    JsonArray DataCollection_1_InternalTankTemperatures_Bus8 = DataCollection_1_InternalTankTemperatures.createNestedArray("Bus8");
+    for (size_t i = 0; i < 8; i++)
+    {
+        DataCollection_1_InternalTankTemperatures_Bus8.add(0);
+    }
+
+// serializeJson(doc, output);
 }
