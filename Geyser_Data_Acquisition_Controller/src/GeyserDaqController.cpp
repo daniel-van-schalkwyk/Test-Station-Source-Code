@@ -108,9 +108,8 @@ void loop()
 }
 
 /**
-  @brief   
+  @brief  
 */
-
 void sendDataToCloud()
 {
   // TODO: Complete this after I get the Wifi working
@@ -170,7 +169,7 @@ void i2cScanner()
   delay(5000);
 }
 
-/*! Function description
+/**
   @brief  This function is used to generate the column names for the sampled dataset that is 
           is sent to the SD card. The column names include the variables from the chamber parameter
           variables and the internal boiler DAQ system. 
@@ -198,7 +197,7 @@ String generateColumnHeaders()
   return finalColumnHeaders;
 }
 
-/** Function description
+/** 
   @brief  This function is used to send the system diagnostics of the microcontroller to the UI computer. 
           This information includes any system errors, number of sensors connected, and any other meta data available.
 */
@@ -225,7 +224,7 @@ void setCurrentTime(dueTimeAndDate *requestedTime)
   requestedTime->second_ = dueRTC.getSeconds();
 }
 
-/*!
+/**
   @brief  This function is used to send a copy of the data sent to the SD card to the computer over the serial port.
   \param  dataString This variable contains the system data string to be sent over serial to the UI computer
 */
@@ -475,7 +474,7 @@ String getSubString(String data, char separator, int index)
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-/** Function description
+/**
  * \brief This function is used to block the code and wait for a user input.
  * \param waitingTime The amount of time to wait for a response before the program continues.
  */
@@ -493,7 +492,7 @@ void waitForResponse(long waitingTime)
   }
 }
 
-/** Function description
+/**
  * \brief This function is used to send inlet control parameters to the inlet controller of the test bench if it is needed
  */
 void sendInletControlParams()
@@ -508,7 +507,7 @@ void sendInletControlParams()
   Serial.println("Params sent.");
 }
 
-/** Function description
+/** 
  * \brief This function responsible for reading commands from the serial port and then configuring the system to be in the correct state
  */
 void readIncomingSerialMessage(int serialPort) 
@@ -779,7 +778,7 @@ void readGetSetCommand(String getSetCommand)
   }
 }
 
-/*! Function description
+/**
   @brief  This function is used to setup the exerimental parameters for the environment to be regulated and for 
           the datasets that will be produced. These parameters include set temperatures, sampling periods, water usage
           schedules and power availability schedules.
@@ -834,7 +833,7 @@ void setupExperimentalParameters(String portMessage, char delimiter, bool apiCon
   }
 }
 
-/*! Function description
+/**
   @brief This function is used to print out the temperature matrix onto a serial port for debugging purposes
   @returns A serial printout of the temperature matrix
 */
@@ -848,7 +847,7 @@ void printOutTemperatureMatrix()
   Serial.println("** --------------------------- **");
 }
 
-/*! Function description
+/**
   @brief Captures a temperature profile instance in time and stores the profile data in a matrix variable
 */
 void getGeyserTemperatureInstance()  
@@ -870,6 +869,10 @@ void getGeyserTemperatureInstance()
   }
 }
 
+/**
+ * @brief 
+ * 
+ */
 void testLatchingRelays(bool which)
 {
   if(which)
@@ -892,7 +895,7 @@ void testLatchingRelays(bool which)
   }
 }
 
-/*! Function description
+/**
   @brief Captures the thermistor temperature reading of the geyserWise thermistor
   \return The bulk water temperature of the geyser water measured by the geyserWise thermistor
 */
@@ -908,7 +911,7 @@ double getGeyserThermistorTemp()
   return geyserWaterTemp;
 }
 
-/*! Function description
+/**
   @brief Captures the thermistor temperature reading of the geyserWise thermistor
   \param  thermistorStruct The thermistor paramater structure to that you want to set
 */
@@ -922,7 +925,7 @@ void setThermistorProperties(paramsThermistorNTC *thermistorStruct)
   thermistorStruct->c2 = 5.7660617403E-07;
 }
 
-/*! Function description
+/**
   @brief This function is called when a "Skip ROM" and temperature request command needs to be sent to all sensors simultaneously.
          If an updated temperature profile is required, this function needs to be called to clear sensor memory and 
          to repopulate with new data. 
@@ -936,7 +939,7 @@ void requestAllTemperatureConversions()
   }
 }
 
-/*! Function description
+/** 
   @brief This function is used explicitly to retrieve sensor data from all sensors sequentially and to 
          store the data in a dedicated temperature profile 2-D array.
   @returns void, but populates a global variable 2-D array
@@ -952,7 +955,7 @@ void getGeyserTemperatures()
   }
 }
 
-/** Function Ddscription
+/** 
  * \brief This function is called to make a string array of the boiler temperature data. This is used to simplify the
  *        data transfer to the SD card and or the computer. The string array is a globally declared variable.
  */
@@ -971,7 +974,7 @@ void createTempProfileStringArray()
   }
 }
 
-/** Function Ddscription
+/**
  * \brief This function is used to create the ultimate string, containing all important system paramters and measurement data. 
  * \return finalDataString - The data entry sent to the dataset on the SD card and or the PC
  */
@@ -1022,7 +1025,7 @@ void controlEnvironment()
   capturePower();
 }
 
-/*! Function description
+/** 
   @brief  This function is used to communicate between the main controller 
           and the inlet water control unit
 */
@@ -1035,7 +1038,7 @@ void controlGeyserInletTemp()
   }
 }
 
-/*! Function description
+/** 
   @brief  This function is used to update control parameters for chamber environment control. 
           This data is not shared to an SD card or over a serial monitor, it is only to regulate 
           certain chamber conditions.
@@ -1047,21 +1050,13 @@ void updateSystemParameters()
     systemUpdateFlag = false; // reset the timer flag
     captureTemperatureData(false);  // Retrieves all temperature data except the inside boiler data
     // Save accumulated information during a time step for data sample event
-    // if(peakSampleCount != 0)
-    // {
-    //   primaryCurrent /= (double)peakSampleCount;
-    //   primaryVoltage /= (double)peakSampleCount;
-    // }
-    // Serial.println(primaryCurrent);
-    // peakSampleCount = 0;
-    // Serial.println(String(millis()) + " - Current = " + String(primaryCurrent) + " - Voltage = " + String(primaryVoltage));
-    // Serial.println(primaryVoltage);
+
     AccumulatedEnergyPerDataSample += calculateLoadPower(primaryVoltage, primaryCurrent, true);
     AccumulatedWaterConsumedPerDataSample += captureWaterConsumption();   // Capture current water consumption levels and accumulated consuption per data sampling period
   }
 }
 
-/** Function Ddscription
+/** 
  * \brief This function is used to create a string of the current system states. These states include 
  *        actuator states, set temperatures provided and which temperature regulation regimes are activated.
  * \return SystemStateString - A string containing set temperatures and system states
@@ -1091,7 +1086,7 @@ String createSystemParamAndStateString()
   return systemStateString;
 }
 
-/*! Function description
+/** 
   @brief  This function is used to update control parameters for chamber environment control. 
           This data is not shared to an SD card or over a serial monitor, it is only to regulate 
           certain chamber conditions.
@@ -1117,7 +1112,7 @@ String sampleData()
   return dataString;
 }
 
-/*! Function description
+/** 
   @brief    This function is responsible for capturing all temperature parameters. This includes the
             internal boiler temp data, the thermistor temp data and the external chamber temperature data.
   \param    captureBoilerData Flag used to indicate whether internal boiler temp data needs to be captured.
@@ -1148,19 +1143,22 @@ void captureTemperatureData(bool captureBoilerData)
   ambError = systemSetParams[chamberSetTemp] - ambientTemp;
 }
 
+/** 
+  @brief    Is responsible for calling the functions that are responsible for sampling power related 
+            variables such as current and voltage.
+*/
 void capturePower()
 {
   if(powerBufferSampledFlag)
     {
       getLoadCurrent();
       getLoadVoltage();
-      peakSampleCount++;
       powerBufferSampledFlag = false;
     }
 }
 
 
-/** Function Ddscription
+/** 
  * \brief This function is used to sample the current consumption of the geyser heating element at an instance of time. 
  * \return currentConsumption(double) - The current consumption of the geyser heating element
  */
@@ -1225,7 +1223,7 @@ int GetAvgValFromArray(uint32_t Array[], int size)
 /** Function Ddscription
  * \brief This function is used to sample the operating voltage of the geyser heating element at an instance of time. 
  *        It will most probably be close to 230V (RMS)
- * \return geyserVoltage(double) - The operating voltage of the geyser heating element.
+ * \return geyserVoltage - The operating voltage of the geyser heating element.
  */
 double getLoadVoltage() 
 {
@@ -1241,9 +1239,9 @@ double getLoadVoltage()
       voltageACsignalBuffer[i] = 0;
     }
     double rmsVoltageMean = (double)PeakAdcValue/sqrt(2.00);
-
     double primaryVoltageSmall = mapDouble(rmsVoltageMean, 0, max12BitNum, 0, 3.30);
-    primaryVoltage = (primaryVoltageSmall * (double)380);
+    // primaryVoltage = (primaryVoltageSmall * (double)380);
+    primaryVoltage = 225.00;
 
     // Cap the current to zero if the output value is unrealistic
     if (primaryVoltage <= 10)  {primaryVoltage = 0;}
@@ -1342,15 +1340,15 @@ void controlAmbTemp()
     getTempMargins();
     systemStateFlags[errorState] = false;
     // Check if the set ambient temperature is achievable
-    if(outsideTemp > ambSetTemp)  
-    {
-      systemStateFlags[errorState] = true;
-      Serial.println("ERROR: -> Set temperature for geyser environment cannot be lower than outside lab temperature:");
-    }
-    else
-    {
-      systemStateFlags[errorState] = false;
-    }
+    // if(outsideTemp > ambSetTemp)  
+    // {
+    //   systemStateFlags[errorState] = true;
+    //   Serial.println("ERROR: -> Set temperature for geyser environment cannot be lower than outside lab temperature:");
+    // }
+    // else
+    // {
+    //   systemStateFlags[errorState] = false;
+    // }
     if(climaticChamberTempArray[amb1TempAddress] == sensorErrorNum || climaticChamberTempArray[amb2TempAddress] == sensorErrorNum)
     {
       systemStateFlags[errorState] = true;
@@ -1475,21 +1473,25 @@ void controlGeyserElement()
     double geyserSetTemp = systemSetParams[setParamsIndex::geyserWaterSetTemp];
     double deadBandBottom = geyserSetTemp - deadBandMargin/2;
     double deadBandTop = geyserSetTemp + deadBandMargin/2;
+    
     // Check if the water temperature is below the set temperature
     if(geyserWaterTemp < deadBandBottom )
     {
       inDeadBand = false;
       // Geyser element should switch on and make sure that temp sensors are not faulty
-      if  (!geyserLatchFlag && (geyserWaterTemp != geyserThermistorDisconnected) && \
-          !(boilerProfileTempArray[3][4] >= deadBandTop + 5) && !(boilerProfileTempArray[2][4] >= deadBandTop + 5)) // Check if other DS18B20 sensors are sensing a higher tank temperature than thermistor (Protection)
-        actuateGeyserElement(geyserElementPowerAvailable, On);
+      if  ((geyserWaterTemp != geyserThermistorDisconnected) && \
+          // Check if other DS18B20 sensors are sensing a higher tank temperature than thermistor (Protection)
+          !(boilerProfileTempArray[0][4] >= deadBandTop + 5) && \
+          !(boilerProfileTempArray[1][4] >= deadBandTop + 5))
+          {
+            actuateGeyserElement(geyserElementPowerAvailable, On);
+          }
     }
     // Check if the water temperature is above the set temperature
     else if(geyserWaterTemp >= deadBandTop)
     {
       // Geyser element should switch off
-      if(geyserLatchFlag)   
-        actuateGeyserElement(geyserElementPowerAvailable, Off);
+      actuateGeyserElement(geyserElementPowerAvailable, Off);
     }
     // Check if the water temperature is in the defined deadband zone
     else if((geyserWaterTemp >= deadBandBottom) && (geyserWaterTemp <= deadBandTop))
