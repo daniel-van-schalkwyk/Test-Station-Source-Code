@@ -1467,7 +1467,7 @@ bool isInPowerSchedule()
 */
 void controlGeyserElement()  
 {
-  if(geyserTempDelayTick >= 5)  // Update geyser element state every 5 seconds 
+  if(geyserTempDelayTick >= 10)  // Update geyser element state every 10 seconds 
   {
     geyserTempDelayTick = 0;
     double geyserSetTemp = systemSetParams[setParamsIndex::geyserWaterSetTemp];
