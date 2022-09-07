@@ -1680,7 +1680,7 @@ void actuateHeatingFans(bool heatingElementState, bool fanState)
     chamberStateFlags[chamberStateIndex::heatingFanElement] = On;
     digitalWrite(ambHeatingElem_set, On);
     digitalWrite(ambHeatingElem_reset, Off);
-    delay(30);
+    delay(15);
     digitalWrite(ambHeatingElem_set, Off);
     ambHeatingFlag = true;
   }
@@ -1690,7 +1690,7 @@ void actuateHeatingFans(bool heatingElementState, bool fanState)
     chamberStateFlags[chamberStateIndex::heatingFanElement] = Off;
     digitalWrite(ambHeatingElem_set, Off);
     digitalWrite(ambHeatingElem_reset, On);
-    delay(30);
+    delay(15);
     digitalWrite(ambHeatingElem_reset, Off);
     ambHeatingFlag = false;
   }
@@ -1709,7 +1709,7 @@ void actuateGeyserElement(bool powerAvailable, bool elementState)
       geyserLatchFlag = On;
       digitalWrite(geyserPowerReset, LOW);
       digitalWrite(geyserPowerSet, HIGH);
-      delay(50);
+      delay(15);
       digitalWrite(geyserPowerSet, LOW);
     }
     else
@@ -1717,7 +1717,7 @@ void actuateGeyserElement(bool powerAvailable, bool elementState)
       geyserLatchFlag = Off;
       digitalWrite(geyserPowerReset, HIGH);
       digitalWrite(geyserPowerSet, LOW);
-      delay(50);
+      delay(15);
       digitalWrite(geyserPowerReset, LOW);
     }
   }
@@ -1726,7 +1726,7 @@ void actuateGeyserElement(bool powerAvailable, bool elementState)
     geyserLatchFlag = Off;
     digitalWrite(geyserPowerReset, HIGH);
     digitalWrite(geyserPowerSet, LOW);
-    delay(50);
+    delay(15);
     digitalWrite(geyserPowerReset, LOW);
   }
 }
