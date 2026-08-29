@@ -1,0 +1,16 @@
+# PlatformIO
+.pio/
+
+# Visual Studio / .NET
+bin/
+obj/
+.vs/
+*.suo
+*.user
+
+# Editor workspace state
+*.code-workspace
+
+# OS cruft
+.DS_Store
+Thumbs.db
