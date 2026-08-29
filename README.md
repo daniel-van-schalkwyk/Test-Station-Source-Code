@@ -77,6 +77,15 @@ The command indices are defined in `GetCommandsIndex`/`SetCommandsIndex` on each
 | `Geyser DAQ Control User Interface/` | WinForms control panel |
 | `InterfaceScript/` | Console test harness for the API library |
 
+## Publications
+
+The test station and the data it produced underpin these peer-reviewed papers:
+
+- van Schalkwyk, P. D., Engelbrecht, J. A. A., & Booysen, M. J. (2022). *Thermal stratification and temperature variation in horizontal electric water heaters: A characterisation platform*. **Energies**, 15(8), 2840. [doi:10.3390/en15082840](https://doi.org/10.3390/en15082840) — describes this test bench itself.
+- van Schalkwyk, P. D., Engelbrecht, J. A. A., & Booysen, M. J. (2024). *Dataset for the characterisation of thermal stratification in horizontally configured electric water heaters*. **Data in Brief**, 53, 110082. [doi:10.1016/j.dib.2024.110082](https://doi.org/10.1016/j.dib.2024.110082) — the published measurement dataset captured with this station.
+- van Schalkwyk, P. D., Engelbrecht, J. A. A., Meyer, J. P., & Booysen, M. J. (2024). *A state-space heating and cooling model for thermal stratification in horizontally configured electric hot water storage cylinders*. **Applied Thermal Engineering**, 245, 122851. [doi:10.1016/j.applthermaleng.2024.122851](https://doi.org/10.1016/j.applthermaleng.2024.122851)
+- van Schalkwyk, P. D., Meyer, J. P., Engelbrecht, J. A. A., & Booysen, M. J. (2025). *Numerical modelling of thermal stratification scenarios in horizontal electric hot water storage tanks*. **Applied Thermal Engineering**, 258, 124716. [doi:10.1016/j.applthermaleng.2024.124716](https://doi.org/10.1016/j.applthermaleng.2024.124716)
+
 ## Related repositories
 
 - [Hot-Water-Storage-Tank-Simulator](https://github.com/daniel-van-schalkwyk/Hot-Water-Storage-Tank-Simulator) — simulation counterpart to the physical bench
